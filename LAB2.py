@@ -8,6 +8,7 @@ import gmplot
 import math
 import mne
 import io
+import json
 
 def day_of_year_to_date(day_of_year, year):
     reference_date = datetime(year, 1, 1)
@@ -47,7 +48,7 @@ def timeSeries_day(title, Bookings):
 
     return df_result
 
-def add_miss(df):
+def add_miss(df, title):
     dow_hour_combinations = [(dow, hour) for dow in range(275,305) for hour in range(24)]
     new_rows = []
 
@@ -66,24 +67,54 @@ def add_miss(df):
 
     print(df)
 
-    # Sort the DataFrame by dow and hour
-    df['_id'] = df['_id'].apply(lambda x: {'dow': int(x['dow']) if isinstance(x, dict) else int(x.split(',')[0].split(':')[1].strip('}{ ')),
-                                       'hour': int(x['hour']) if isinstance(x, dict) else int(x.split(',')[1].split(':')[1].strip('}{ '))})
+    df[['dow', 'hour']] = df['_id'].apply(lambda x: pd.Series([x['dow'], x['hour']] if isinstance(x, dict) else x.split(',')))
+
+# Convert the columns to the appropriate data type
+    df['dow'] = df['dow'].apply(lambda x: int(x.split(':')[1].strip('}{ ')) if isinstance(x, str) else int(x))
+    df['hour'] = df['hour'].apply(lambda x: int(x.split(':')[1].strip('}{ ')) if isinstance(x, str) else int(x))
+
+# Sort the DataFrame by 'dow' and 'hour'
+    df = df.sort_values(by=['dow', 'hour']).reset_index(drop=True) 
     
-    df = df.sort_values(by=[('_id', 'dow'), ('_id', 'hour')]).reset_index(drop=True)
+    print(df)
 
 
-    
-    plt.plot(df['rentals'])
-    plt.title('Filled rentals timeseries')
-    plt.xlabel('Index')
-    plt.ylabel('Number of rentals')
-    plt.xticks(rotation=50
-               )
-    plt.grid(linestyle='--', linewidth=0.8)
+    labels = []
+    ticks = []
+
+    for i in range(df.shape[0] - 1):
+        if (df["hour"][i] == 0) or (
+            (df["dow"][i + 1] - df["dow"][i]) != 0) and (
+            (df["dow"][i + 1] - df["dow"][i]) != 1):
+                ticks.append(i)
+                print(df["dow"][i + 1])
+                formatted_date = day_of_year_to_date(int(df["dow"][i + 1]), 2017)
+                labels.append(formatted_date)
+    plt.figure()
+    plt.xlabel("Days of October")
+    plt.ylabel("N. of Bookings")
+    plt.title(title)
+    plt.plot(df["totOFbookings"], label="Bookings")
+    plt.xticks(ticks=ticks,
+               labels=labels,
+               rotation=-30)
+    plt.legend(loc='best')
+    plt.grid(True, which="both")
     plt.show()
 
-    df.plot(y='rentals', title="Rentals in AMSTERDAM")
+    
+#     plt.plot(df['totOFbookings'])
+#     plt.title('Filled rentals timeseries')
+#     plt.xlabel('Index')
+#     plt.ylabel('Number of rentals')
+#     plt.xticks(rotation=50
+#                )
+#     plt.grid(linestyle='--', linewidth=0.8)
+#     plt.show()
+    
+    
+
+    #df.plot(y='totOFbookings', title="Rentals in AMSTERDAM")
 
     return df
 
@@ -107,7 +138,7 @@ if __name__ == "__main__":
     db = client['carsharing']
     Bookings = db['PermanentBookings']
 
-    cities=["Amsterdam","Milano"]
+    cities=["Denver","Amsterdam","Milano"]
 
     #---------------------------------------------------------------------------------------------
 
@@ -171,4 +202,4 @@ if __name__ == "__main__":
         df = time_series_df = timeSeries_day(city + "_timeSeries", timeSeries['Bookings' + city])
 
         # Call the function to fill in missing combinations with zero values
-        df_n = add_miss(pd.read_csv(io.StringIO(df)))
+        df_n = add_miss(pd.read_csv(io.StringIO(df)),city + "_timeSeries with missed data")
