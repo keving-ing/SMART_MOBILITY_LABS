@@ -9,6 +9,9 @@ import math
 import mne
 import io
 import json
+from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
+
 
 def day_of_year_to_date(day_of_year, year):
     reference_date = datetime(year, 1, 1)
@@ -40,7 +43,7 @@ def timeSeries_day(title, Bookings):
                rotation=-30)
     plt.legend(loc='best')
     plt.grid(True, which="both")
-    plt.show()
+    #plt.show()
 
     DFBookings.columns = ['_id', 'totOFbookings']
 
@@ -100,7 +103,7 @@ def add_miss(df, title):
                rotation=-30)
     plt.legend(loc='best')
     plt.grid(True, which="both")
-    plt.show()
+   # plt.show()
 
     
 #     plt.plot(df['totOFbookings'])
@@ -119,9 +122,65 @@ def add_miss(df, title):
     return df
 
 
-def dateparse(time_insex):
-        return pd.datetime.fromtimestamp(float(time_insex)*3600)
 
+def stationarity(df,title):
+    labels = []
+    ticks = []
+    for i in range(df.shape[0] - 1):
+        if (df["hour"][i] == 0) or (
+            (df["dow"][i + 1] - df["dow"][i]) != 0) and (
+            (df["dow"][i + 1] - df["dow"][i]) != 1):
+                ticks.append(i)
+                print(df["dow"][i + 1])
+                formatted_date = day_of_year_to_date(int(df["dow"][i + 1]), 2017)
+                labels.append(formatted_date)
+    
+    df['MA'] = df['totOFbookings'].rolling(24*7).mean() # Moving average 
+    df['MS'] = df['totOFbookings'].rolling(24*7).std() # Moving std 
+    plt.figure(constrained_layout=True)
+    plt.plot(df['totOFbookings'], linewidth=1, label='Number of rentals') 
+    plt.plot(df['MA'], linewidth=2, color='r', label='Moving Average') 
+    plt.plot(df['MS'], linewidth=2, label='Moving Std')
+    plt.title('Moving Average/Std of bookings of '+title)
+    plt.xlabel('Date')
+    plt.ylabel('Number of bookings')
+    plt.xticks(ticks=ticks,
+               labels=labels,
+               rotation=-30)
+    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.legend()
+    plt.show()
+
+    return df
+
+def autocorrelation(df,title):
+     plt.figure(constrained_layout=True)
+     pd.plotting.autocorrelation_plot(df["totOFbookings"])
+     plt.title(title+ '_ACF')
+     plt.grid()
+     plt.show()
+     # Zoom in
+     n_lags = 48
+     fig, ax = plt.subplots(constrained_layout=True)
+     plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
+     plt.title('Autocorrelation Function of '+title+'; Lags: %d' % n_lags)
+     plt.grid(which='both')
+     plt.xlabel("Lag")
+     plt.ylabel("Autocorrelation")
+     plt.show()
+     #%% PACF: it gives us an initial guess on parameter P
+     n_lags = 48
+     fig, ax = plt.subplots(constrained_layout=True)
+     plot_pacf(df["totOFbookings"], ax=ax, lags=n_lags)
+     plt.title('Partial Autocorrelation Function of '+title+'; Lags: %d' % n_lags)
+     plt.grid(which='both')
+     plt.xlabel("Lag")
+     plt.ylabel("Partial Autocorrelation")
+     plt.show()
+
+
+
+     
 
 
 if __name__ == "__main__":
@@ -202,4 +261,13 @@ if __name__ == "__main__":
         df = time_series_df = timeSeries_day(city + "_timeSeries", timeSeries['Bookings' + city])
 
         # Call the function to fill in missing combinations with zero values
-        df_n = add_miss(pd.read_csv(io.StringIO(df)),city + "_timeSeries with missed data")
+        df_miss = add_miss(pd.read_csv(io.StringIO(df)),city + "_timeSeries with missed data")
+
+        df_stat=stationarity(df_miss,city)
+        df_autoc=autocorrelation(df_miss,city)
+        #%% Fitting the model with initial guess #choose the order of the initial model 
+        
+
+
+
+
