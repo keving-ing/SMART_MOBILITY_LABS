@@ -284,7 +284,8 @@ def model_training(train, test, data, title):
     # plt.ylabel("Density")
     # plt.show()
 # TASK7
-def variation_p(df,train,test,title,q,d):
+def variation(df,title,q,d):
+
     data=df['totOFbookings'].values.astype(float)
     train,test= data[0:7*24], data [7*24:(2*7*24)]
     len_test=len(test)
@@ -313,6 +314,7 @@ def variation_p(df,train,test,title,q,d):
 
 
 
+
 #plot
     plt.plot(test,color = 'black', label = "Original")
     for p in p_var:
@@ -330,7 +332,7 @@ def variation_p(df,train,test,title,q,d):
         results["mse"].append(mean_squared_error(test,predictions[p_var.index(p)]))
         results["mae"].append(mean_absolute_error(test,predictions[p_var.index(p)]))
         results["mape"].append(mape)
-        #plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
+        plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
 
     plt.title('Parameter p variation for '+ city)
     plt.xlabel(" hours")
@@ -338,6 +340,47 @@ def variation_p(df,train,test,title,q,d):
     plt.legend(loc='best')
     plt.grid(linestyle = '--', linewidth=0.8)
     plt.show()
+
+ # %% Parameter q variation
+    # testing
+
+    p = 1  # insert the p with lowest error here
+    MA_orders = (1, 2, 3)
+    predictions = np.zeros((len(p_var), len_test))
+    for q in MA_orders:
+        print('Testing ARIMA order (%i, 0, %i)' % (p, q))
+        train, test = data[0:7*24], data[7*24:(7*24 + len_test)]
+        history = [w for w in train]
+        for t in range(0, len_test):
+            model = ARIMA(history, order=(p, d, q))
+            model_fit = model.fit(method='statespace')
+            output = model_fit.forecast()
+            yhat = output[0]
+            predictions[p_var.index(q)][t] = yhat
+    obs = test[t]
+    history.append(obs)  # expanding window
+    # plotting and metrics
+    plt.plot(test, color="black", label="Original")
+    for q in MA_orders:
+        print("(%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p, q,mean_absolute_error(test, predictions[p_var.index(q)])
+        , mean_squared_error(test, predictions[p_var.index(q)])
+        , r2_score(test, predictions[p_var.index(q)])))
+        mae = mean_absolute_error(test, predictions[p_var.index(p)])
+        mape = mae / np.mean(test) * 100
+        results["p"].append(p)
+        results["d"].append(0)
+        results["q"].append(q)
+        results["mse"].append(mean_squared_error(test, predictions[p_var.index(q)]))
+        results["mae"].append(mean_absolute_error(test, predictions[p_var.index(q)]))
+        results["mape"].append(mape)
+        plt.plot(predictions[p_var.index(q)], label='q=%i' % q)
+    plt.title('Parameter q variation for ' + title)
+    plt.xlabel("Testing hours")
+    plt.ylabel("Number of rentals")  # plt.xticks(rotation=90) plt.legend(loc='best')
+    plt.show()
+
+
+
 
 
 
@@ -435,5 +478,5 @@ if __name__ == "__main__":
         train, test, data = split(df_miss)
 
         model_training(train, test, data, city)
-        variation_p(df_miss,train,test,"variation over coefficient p",2,0)
+        variation(df_miss,"variation over coefficient p",2,0)
         
