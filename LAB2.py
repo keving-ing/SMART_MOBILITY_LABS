@@ -9,7 +9,7 @@ import math
 import mne
 import io
 import json
-from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
 
 from sklearn.metrics import (mean_squared_error, mean_absolute_error,
@@ -39,16 +39,16 @@ def timeSeries_day(title, Bookings):
             formatted_date = day_of_year_to_date(DFBookings["_id"][i + 1]["dow"], 2017)
             labels.append(formatted_date)
 
-    plt.figure()
-    plt.xlabel("Days of October")
-    plt.ylabel("N. of Bookings")
-    plt.title(title)
-    plt.plot(DFBookings["totOFbookings"], label="Bookings")
-    plt.xticks(ticks=ticks,
-               labels=labels,
-               rotation=-30)
-    plt.legend(loc='best')
-    plt.grid(True, which="both")
+    # plt.figure()
+    # plt.xlabel("Days of October")
+    # plt.ylabel("N. of Bookings")
+    # plt.title(title)
+    # plt.plot(DFBookings["totOFbookings"], label="Bookings")
+    # plt.xticks(ticks=ticks,
+    #            labels=labels,
+    #            rotation=-30)
+    # plt.legend(loc='best')
+    # plt.grid(True, which="both")
 
     # plt.show()
 
@@ -105,17 +105,20 @@ def add_miss(df, title):
             print(df["dow"][i + 1])
             formatted_date = day_of_year_to_date(int(df["dow"][i + 1]), 2017)
             labels.append(formatted_date)
-    plt.figure()
-    plt.xlabel("Days of October")
-    plt.ylabel("N. of Bookings")
-    plt.title(title)
-    plt.plot(df["totOFbookings"], label="Bookings")
-    plt.xticks(ticks=ticks,
-               labels=labels,
-               rotation=-30)
-    plt.legend(loc='best')
-    plt.grid(True, which="both")
+    # plt.figure()
+    # plt.xlabel("Days of October")
+    # plt.ylabel("N. of Bookings")
+    # plt.title(title)
+    # plt.plot(df["totOFbookings"], label="Bookings")
+    # plt.xticks(ticks=ticks,
+    #            labels=labels,
+    #            rotation=-30)
+    # plt.legend(loc='best')
+    # plt.grid(True, which="both")
 
+
+    
+#NON SCOMMENTARE ERA GIA COMMENTATO***
     # plt.show()
 
    # plt.show()
@@ -131,7 +134,7 @@ def add_miss(df, title):
     #     plt.show()
 
     # df.plot(y='totOFbookings', title="Rentals in AMSTERDAM")
-
+#NON SCOMMENTARE ERA GIA COMMENTATO***
     return df
 
 
@@ -150,47 +153,47 @@ def stationarity(df, title):
 
     df['MA'] = df['totOFbookings'].rolling(24 * 7).mean()  # Moving average
     df['MS'] = df['totOFbookings'].rolling(24 * 7).std()  # Moving std
-    plt.figure(constrained_layout=True)
-    plt.plot(df['totOFbookings'], linewidth=1, label='Number of rentals')
-    plt.plot(df['MA'], linewidth=2, color='r', label='Moving Average')
-    plt.plot(df['MS'], linewidth=2, label='Moving Std')
-    plt.title('Moving Average/Std of bookings of ' + title)
-    plt.xlabel('Date')
-    plt.ylabel('Number of bookings')
-    plt.xticks(ticks=ticks,
-               labels=labels,
-               rotation=-30)
-    plt.grid(linestyle='--', linewidth=0.8)
-    plt.legend()
-    plt.show()
+    # plt.figure(constrained_layout=True)
+    # plt.plot(df['totOFbookings'], linewidth=1, label='Number of rentals')
+    # plt.plot(df['MA'], linewidth=2, color='r', label='Moving Average')
+    # plt.plot(df['MS'], linewidth=2, label='Moving Std')
+    # plt.title('Moving Average/Std of bookings of ' + title)
+    # plt.xlabel('Date')
+    # plt.ylabel('Number of bookings')
+    # plt.xticks(ticks=ticks,
+    #            labels=labels,
+    #            rotation=-30)
+    # plt.grid(linestyle='--', linewidth=0.8)
+    # plt.legend()
+    # plt.show()
 
     return df
 
 
 def autocorrelation(df, title):
-    plt.figure(constrained_layout=True)
-    pd.plotting.autocorrelation_plot(df["totOFbookings"])
-    plt.title(title + '_ACF')
-    plt.grid()
-    plt.show()
+    # plt.figure(constrained_layout=True)
+    # pd.plotting.autocorrelation_plot(df["totOFbookings"])
+    # plt.title(title + '_ACF')
+    # plt.grid()
+    # plt.show()
     # Zoom in
     n_lags = 48
     fig, ax = plt.subplots(constrained_layout=True)
-    plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
-    plt.title('Autocorrelation Function of ' + title + '; Lags: %d' % n_lags)
-    plt.grid(which='both')
-    plt.xlabel("Lag")
-    plt.ylabel("Autocorrelation")
-    plt.show()
+    # plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
+    # plt.title('Autocorrelation Function of ' + title + '; Lags: %d' % n_lags)
+    # plt.grid(which='both')
+    # plt.xlabel("Lag")
+    # plt.ylabel("Autocorrelation")
+    # plt.show()
     # %% PACF: it gives us an initial guess on parameter P
     n_lags = 48
     fig, ax = plt.subplots(constrained_layout=True)
-    plot_pacf(df["totOFbookings"], ax=ax, lags=n_lags)
-    plt.title('Partial Autocorrelation Function of ' + title + '; Lags: %d' % n_lags)
-    plt.grid(which='both')
-    plt.xlabel("Lag")
-    plt.ylabel("Partial Autocorrelation")
-    plt.show()
+    # plot_pacf(df["totOFbookings"], ax=ax, lags=n_lags)
+    # plt.title('Partial Autocorrelation Function of ' + title + '; Lags: %d' % n_lags)
+    # plt.grid(which='both')
+    # plt.xlabel("Lag")
+    # plt.ylabel("Partial Autocorrelation")
+    # plt.show()
 
 def split(df):
     data = df["totOFbookings"].values.astype(float)
@@ -208,15 +211,15 @@ def model_training(train, test, data, title):
 
     # print(model_fit.summary())
 
-    plt.plot(train, label='Original')
-    plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of ' + title + ' - Training phase')
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='upper right')
-    plt.grid(linestyle='--', linewidth=0.8)
-    plt.show()
+    # plt.plot(train, label='Original')
+    # plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
+    # plt.title('Original/Forecast timeseries of ' + title + ' - Training phase')
+    # plt.xlabel("Date")
+    # plt.ylabel("Number of rentals")
+    # plt.xticks(rotation=50)
+    # plt.legend(loc='upper right')
+    # plt.grid(linestyle='--', linewidth=0.8)
+    # plt.show()
 
     ##ERROR METRICS
 
@@ -249,39 +252,96 @@ def model_training(train, test, data, title):
         obs = test[t]
         history = np.append(history, obs)  # expanding window
     # plots
-    plt.plot(test, label='Original')
-    plt.plot(predictions, color="red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of ' + title + ' - Testing phase')
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='best')
-    plt.grid(linestyle='--', linewidth=0.8)
-    plt.show()
+    # plt.plot(test, label='Original')
+    # plt.plot(predictions, color="red", label='Forecasted')
+    # plt.title('Original/Forecast timeseries of ' + title + ' - Testing phase')
+    # plt.xlabel("Date")
+    # plt.ylabel("Number of rentals")
+    # plt.xticks(rotation=50)
+    # plt.legend(loc='best')
+    # plt.grid(linestyle='--', linewidth=0.8)
+    # plt.show()
 
     mae = mean_absolute_error(test, predictions)
     mape = mae / np.mean(test[0:len(model_fit.fittedvalues)]) * 100
 
     print(str(mae) + "      " + str(mape))
     # %% Fitted initial model
-    plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
-    plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of ' + title)
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='upper right')
-    plt.grid(linestyle='--', linewidth=0.8)
+    # plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
+    # plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
+    # plt.title('Original/Forecast timeseries of ' + title)
+    # plt.xlabel("Date")
+    # plt.ylabel("Number of rentals")
+    # plt.xticks(rotation=50)
+    # plt.legend(loc='upper right')
+    # plt.grid(linestyle='--', linewidth=0.8)
 
-    residuals = pd.DataFrame(model_fit.resid)
-    residuals.plot()
-    residuals.plot(kind='kde')
-    plt.title('Model Residuals_ARIMA ' + title)
-    plt.xlabel("Residual")
-    plt.ylabel("Density")
+    # residuals = pd.DataFrame(model_fit.resid)
+    # residuals.plot()
+    # residuals.plot(kind='kde')
+    # plt.title('Model Residuals_ARIMA ' + title)
+    # plt.xlabel("Residual")
+    # plt.ylabel("Density")
+    # plt.show()
+# TASK7
+def variation_p(df,train,test,title,q,d):
+    data=df['totOFbookings'].values.astype(float)
+    train,test= data[0:7*24], data [7*24:(2*7*24)]
+    len_test=len(test)
+    p_var=(1,2,3)
+
+    predictions = np.zeros((len(p_var),len_test))
+    results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": []}
+    try:
+        for p in p_var:
+            print('Testing ARIMA order (%i, 0, %i)' % (p,q))
+            train, test = data[0:7*24], data[7*24:(7*24+len_test)]
+            history = [x for x in train]
+            for t in range(0, len_test):
+                model = ARIMA(history, order= (p, d, q))
+                model_fit = model.fit( method='statespace')
+                output = model_fit.forecast()
+                yhat = output[0]
+                predictions[p_var.index(p)][t] = yhat
+                obs = test[t]
+                history.append(obs) #expanding window
+                history=history[1:]
+    except Exception as e:
+        print(f"Si è verificata un'eccezione di tipo {type(e).__name__}: {str(e)}")
+        pass
+    # Altre azioni o gestione dell'eccezione specifica
+
+
+
+#plot
+    plt.plot(test,color = 'black', label = "Original")
+    for p in p_var:
+        print("(%i,0,2) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" %(p,
+                                                                       mean_absolute_error(test,predictions[p_var.index(p)]),
+                                                                       mean_squared_error(test,predictions[p_var.index(p)]),
+                                                                       r2_score(test,predictions[p_var.index(p)])))
+
+
+        mae = mean_absolute_error(test,predictions[p_var.index(p)])
+        mape = mae/np.mean(test)*100
+        results["p"].append(p)
+        results["d"].append(0)
+        results["q"].append(2)
+        results["mse"].append(mean_squared_error(test,predictions[p_var.index(p)]))
+        results["mae"].append(mean_absolute_error(test,predictions[p_var.index(p)]))
+        results["mape"].append(mape)
+        #plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
+
+    plt.title('Parameter p variation for '+ city)
+    plt.xlabel(" hours")
+    plt.ylabel("Number of rentals")
+    plt.legend(loc='best')
+    plt.grid(linestyle = '--', linewidth=0.8)
     plt.show()
 
 
+
+     
 
      
 
@@ -375,9 +435,5 @@ if __name__ == "__main__":
         train, test, data = split(df_miss)
 
         model_training(train, test, data, city)
+        variation_p(df_miss,train,test,"variation over coefficient p",2,0)
         
-
-
-
-
-
