@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e081b3ee-6456-49c8-b553-926eada68e47" name="Changes" comment="TASK 2 DA COMOPLETARE PER UN ERRORE 13/12/2023">
-      <change beforePath="$PROJECT_DIR$/LAB2.py" beforeDir="false" afterPath="$PROJECT_DIR$/LAB2.py" afterDir="false" />
-    </list>
+    <list default="true" id="e081b3ee-6456-49c8-b553-926eada68e47" name="Changes" comment="TASK 2 DA COMOPLETARE PER UN ERRORE 13/12/2023" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -50,7 +48,7 @@
       <option name="presentableId" value="Default" />
       <updated>1702482407664</updated>
       <workItem from="1702482408682" duration="4538000" />
-      <workItem from="1702721110361" duration="18776000" />
+      <workItem from="1702721110361" duration="19243000" />
     </task>
     <task id="LOCAL-00001" summary="TASK 2 DA COMOPLETARE 13/12/2023">
       <created>1702486123220</created>
@@ -78,6 +76,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="TASK 2 DA COMOPLETARE PER UN ERRORE 13/12/2023" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/SMART_MOBILITY_LABS$LAB2.coverage" NAME="LAB2 Coverage Results" MODIFIED="1702812950251" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SMART_MOBILITY_LABS$LAB2.coverage" NAME="LAB2 Coverage Results" MODIFIED="1702813675870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
