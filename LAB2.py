@@ -11,12 +11,11 @@ import io
 import json
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
-<<<<<<< HEAD
+
 from sklearn.metrics import (mean_squared_error, mean_absolute_error,
                              r2_score)
 
-=======
->>>>>>> 24a31e3536210032ec04cfce09acabfb3bb15eca
+
 
 
 def day_of_year_to_date(day_of_year, year):
@@ -50,11 +49,11 @@ def timeSeries_day(title, Bookings):
                rotation=-30)
     plt.legend(loc='best')
     plt.grid(True, which="both")
-<<<<<<< HEAD
+
     # plt.show()
-=======
+
     #plt.show()
->>>>>>> 24a31e3536210032ec04cfce09acabfb3bb15eca
+
 
     DFBookings.columns = ['_id', 'totOFbookings']
 
@@ -116,11 +115,11 @@ def add_miss(df, title):
                rotation=-30)
     plt.legend(loc='best')
     plt.grid(True, which="both")
-<<<<<<< HEAD
+
     # plt.show()
-=======
+
    # plt.show()
->>>>>>> 24a31e3536210032ec04cfce09acabfb3bb15eca
+
 
     #     plt.plot(df['totOFbookings'])
     #     plt.title('Filled rentals timeseries')
@@ -136,7 +135,7 @@ def add_miss(df, title):
     return df
 
 
-<<<<<<< HEAD
+
 def stationarity(df, title):
     labels = []
     ticks = []
@@ -282,153 +281,6 @@ def model_training(train, test, data, title):
     plt.ylabel("Density")
     plt.show()
 
-def split(df):
-    data = df["totOFbookings"].values.astype(float)
-    N = 7 * 24
-    train_set, test_set = data[0:N], data[N:(2 * N)]
-
-    return train_set, test_set, data
-
-
-##TASK 6
-def model_training(train, test, data, title):
-    order = (2, 0, 2)  # p = 2 , q = 2
-    model = ARIMA(train.astype(float), order=order)
-    model_fit = model.fit(method='statespace')
-
-    # print(model_fit.summary())
-
-    plt.plot(train, label='Original')
-    plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of ' + title + ' - Training phase')
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='upper right')
-    plt.grid(linestyle='--', linewidth=0.8)
-    plt.show()
-
-    ##ERROR METRICS
-
-    mae = mean_absolute_error(train[0:len(model_fit.fittedvalues)], model_fit.fittedvalues)
-    mape = mae / np.mean(train[0:len(model_fit.fittedvalues)]) * 100
-    print("TRAIN DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" % (2, 2,
-                                                                                                   mean_absolute_error(
-                                                                                                       train[0:len(
-                                                                                                           model_fit.fittedvalues)],
-                                                                                                       model_fit.fittedvalues),
-                                                                                                   mean_squared_error(
-                                                                                                       train[0:len(
-                                                                                                           model_fit.fittedvalues)],
-                                                                                                       model_fit.fittedvalues),
-                                                                                                   r2_score(train[0:len(
-                                                                                                       model_fit.fittedvalues)],
-                                                                                                            model_fit.fittedvalues),
-                                                                                                   mape))
-
-    ##MODEL TESTING AND ERROR METRICS
-
-    history = train.astype(float)
-    predictions = []
-    for t in range(0, len(test)):
-        model = ARIMA(history, order=order)
-        model_fit = model.fit(method='statespace')
-        output = model_fit.forecast()
-        yhat = output[0]
-        predictions.append(yhat)
-        obs = test[t]
-        history = np.append(history, obs)  # expanding window
-    # plots
-    plt.plot(test, label='Original')
-    plt.plot(predictions, color="red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of ' + title + ' - Testing phase')
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='best')
-    plt.grid(linestyle='--', linewidth=0.8)
-    plt.show()
-
-    mae = mean_absolute_error(test, predictions)
-    mape = mae / np.mean(test[0:len(model_fit.fittedvalues)]) * 100
-
-    print(str(mae) + "      " + str(mape))
-    # %% Fitted initial model
-    plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
-    plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of ' + title)
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='upper right')
-    plt.grid(linestyle='--', linewidth=0.8)
-
-    residuals = pd.DataFrame(model_fit.resid)
-    residuals.plot()
-    residuals.plot(kind='kde')
-    plt.title('Model Residuals_ARIMA ' + title)
-    plt.xlabel("Residual")
-    plt.ylabel("Density")
-    plt.show()
-
-=======
->>>>>>> 24a31e3536210032ec04cfce09acabfb3bb15eca
-
-def stationarity(df,title):
-    labels = []
-    ticks = []
-    for i in range(df.shape[0] - 1):
-        if (df["hour"][i] == 0) or (
-            (df["dow"][i + 1] - df["dow"][i]) != 0) and (
-            (df["dow"][i + 1] - df["dow"][i]) != 1):
-                ticks.append(i)
-                print(df["dow"][i + 1])
-                formatted_date = day_of_year_to_date(int(df["dow"][i + 1]), 2017)
-                labels.append(formatted_date)
-    
-    df['MA'] = df['totOFbookings'].rolling(24*7).mean() # Moving average 
-    df['MS'] = df['totOFbookings'].rolling(24*7).std() # Moving std 
-    plt.figure(constrained_layout=True)
-    plt.plot(df['totOFbookings'], linewidth=1, label='Number of rentals') 
-    plt.plot(df['MA'], linewidth=2, color='r', label='Moving Average') 
-    plt.plot(df['MS'], linewidth=2, label='Moving Std')
-    plt.title('Moving Average/Std of bookings of '+title)
-    plt.xlabel('Date')
-    plt.ylabel('Number of bookings')
-    plt.xticks(ticks=ticks,
-               labels=labels,
-               rotation=-30)
-    plt.grid(linestyle = '--', linewidth=0.8)
-    plt.legend()
-    plt.show()
-
-    return df
-
-def autocorrelation(df,title):
-     plt.figure(constrained_layout=True)
-     pd.plotting.autocorrelation_plot(df["totOFbookings"])
-     plt.title(title+ '_ACF')
-     plt.grid()
-     plt.show()
-     # Zoom in
-     n_lags = 48
-     fig, ax = plt.subplots(constrained_layout=True)
-     plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
-     plt.title('Autocorrelation Function of '+title+'; Lags: %d' % n_lags)
-     plt.grid(which='both')
-     plt.xlabel("Lag")
-     plt.ylabel("Autocorrelation")
-     plt.show()
-     #%% PACF: it gives us an initial guess on parameter P
-     n_lags = 48
-     fig, ax = plt.subplots(constrained_layout=True)
-     plot_pacf(df["totOFbookings"], ax=ax, lags=n_lags)
-     plt.title('Partial Autocorrelation Function of '+title+'; Lags: %d' % n_lags)
-     plt.grid(which='both')
-     plt.xlabel("Lag")
-     plt.ylabel("Partial Autocorrelation")
-     plt.show()
-
 
 
      
@@ -511,7 +363,7 @@ if __name__ == "__main__":
         df = time_series_df = timeSeries_day(city + "_timeSeries", timeSeries['Bookings' + city])
 
         # Call the function to fill in missing combinations with zero values
-<<<<<<< HEAD
+
         df_miss = add_miss(pd.read_csv(io.StringIO(df)), city + "_timeSeries with missed data")
 
         df_stat = stationarity(df_miss, city)
@@ -523,15 +375,9 @@ if __name__ == "__main__":
         train, test, data = split(df_miss)
 
         model_training(train, test, data, city)
-=======
-        df_miss = add_miss(pd.read_csv(io.StringIO(df)),city + "_timeSeries with missed data")
-
-        df_stat=stationarity(df_miss,city)
-        df_autoc=autocorrelation(df_miss,city)
-        #%% Fitting the model with initial guess #choose the order of the initial model 
         
 
 
 
 
->>>>>>> 24a31e3536210032ec04cfce09acabfb3bb15eca
+
