@@ -1,0 +1,161 @@
+Index: LAB2.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import pymongo as pm\nimport matplotlib.pyplot as plt\nimport numpy as np\nimport pandas as pd\nfrom datetime import datetime, timedelta\nimport calendar\nimport gmplot\nimport math\nimport mne\n\ndef day_of_year_to_date(day_of_year, year):\n    reference_date = datetime(year, 1, 1)\n    target_date = reference_date + timedelta(days=day_of_year - 1)\n\n    return target_date.strftime('%d')\n\ndef timeSeries_day(title,Bookings):\n       listBookings = list(Bookings)\n       DFBookings=pd.DataFrame(listBookings)\n       labels=[]\n       ticks=[]\n\n       for i in range(DFBookings.shape[0]):\n              if i == (DFBookings.shape[0]-1):\n                     break\n              elif (DFBookings[\"_id\"][i][\"hour\"]==0) or ((DFBookings[\"_id\"][i+1][\"dow\"]-DFBookings[\"_id\"][i][\"dow\"])!=0) and ((DFBookings[\"_id\"][i+1][\"dow\"] - DFBookings[\"_id\"][i][\"dow\"])!=1):\n                     ticks.append(i)\n                     formatted_date = day_of_year_to_date( DFBookings[\"_id\"][i+1][\"dow\"], 2017)\n                     labels.append(formatted_date)\n\n                    #  if formatted_date == '01':\n                    #        ticks.append(0)\n                    #        labels.append(\"02\")\n\n                    #  if formatted_date == '23':\n                    #        ticks.append(0)\n                    #        labels.append(\"24\")\n\n       plt.figure()\n       plt.xlabel(\"Days of October\")\n       plt.ylabel(\"N. of Bookings\")\n       plt.title(title)\n       plt.plot(DFBookings[\"totOFbookings\"],label=\"Bookings\")\n       plt.xticks(ticks=ticks,\n                  labels=labels,\n                  rotation=-30)\n       plt.legend(loc='best')\n       plt.grid(True,which=\"both\")\n       #plt.show()\n\n       DFBookings.columns = ['time','rentals']\n\n       df = DFBookings.to_csv(path_or_buf = \"C:/Users/kevin/Documents/PoliTo/SMART_MOBILITY/\"+title+\".csv\", index = False)\n\n       return df\n\ndef add_miss(df):\n    \n    df_new = pd.DataFrame(columns=['time', 'rental'])\n    for i in range(1, len(df), 1):\n        if (str(df.index[i] - df.index[i - 1]) != '0 days 01:00:00'):\n            s = pd.date_range(df.index[i - 1], df.index[i], freq='1H')\n            for j in range(1, len(s) - 1):\n                newvalue = df.iloc[i + j - 24].rental +10 * np.random.random_sample() / 100.0\n                print('Fitting', i, j, newvalue)\n                df_new = df_new.append({'Time': s[j], 'rental': newvalue}, ignore_index = True)\n    df_new = df_new.set_index('time')\n    df = df.append(df_new)\n    df = df.sort_index()\n\n    plt.plot(df)\n    plt.title('Filled rentals timeseries of ')\n    plt.xlabel('Date')\n    plt.ylabel('Number of rentals')\n    plt.xticks(rotation=50)\n    plt.grid(linestyle = '--', linewidth=0.8)\n\n    plt.show();\n\n    df.plot(title=\"Rentals in AMSTERDAM\")\n\n\n\n\n\nif __name__ == \"__main__\":\n\n    client = pm.MongoClient('bigdatadb.polito.it',\n                        port=27017,\n                        ssl=True,\n                        tlsAllowInvalidCertificates=True,\n                        username='ictts',\n                        password='Ict4SM22!',\n                        authSource='carsharing',\n                        #authMechanism='SCRAM-SHA-1'\n    )\n    db = client['carsharing']\n    Bookings = db['PermanentBookings']\n\n    cities=[\"Denver\",\"Amsterdam\",\"Milano\"]\n\n    #---------------------------------------------------------------------------------------------\n\n    #STEP_3 - TASK1\n    # Setting of the period of time\n    date_init = datetime.strptime('2017-10-01T22:00:00','%Y-%m-%dT%H:%M:%S')\n    date_finish = datetime.strptime('2017-10-31T23:59:59','%Y-%m-%dT%H:%M:%S')\n    #date_init_Denver = datetime.strptime('2017-10-01T06:00:00','%Y-%m-%dT%H:%M:%S')\n    #date_finish_Denver = datetime.strptime('2017-10-30T07:59:59','%Y-%m-%dT%H:%M:%S')\n    init_unix = (date_init - datetime(1970, 1, 1)).total_seconds()\n    finish_unix = (date_finish - datetime(1970, 1, 1)).total_seconds()\n\n\n    timeSeries = {}\n    for city in cities:\n        timeSeries['Bookings{0}'.format(city)] = Bookings.aggregate([\n        {\"$match\": {\n                    \"city\":city,\n                    \"init_time\": {\"$gte\": init_unix, \"$lte\": finish_unix}\n                   }\n                },\n        {\"$project\":{\n                \"duration\":{\n                        \"$subtract\":[\"$final_time\",\"$init_time\"]\n                },\n\n                \"or_de\":{\n                        \"$ne\":[{\n                                \"$arrayElemAt\":[\"$origin_destination.coordinates\",0]\n                        },\n                        {\n                                \"$arrayElemAt\":[\"$origin_destination.coordinates\",1]\n                        }\n                        ]\n                },\n        \n            \"dow\":{\"$dayOfYear\":\"$init_date\"},\n            \"hour\" : {\"$hour\":\"$init_date\"}  }\n                    },\n                    {\"$match\": {\n                        \"duration\":{\n                                \"$gte\": 5*60, \"$lte\":150*60\n                        },\n                        \"or_de\": True \n                    }\n                    },\n\n        {\"$group\":{\n            \"_id\": {\"dow\":\"$dow\",\"hour\":\"$hour\"},\n            \"totOFbookings\":{\"$sum\":1}\n            \n                }\n                },\n        {\"$sort\":{\n                \"_id\":1\n            }\n                \n                }])\n\n        time_series_df = timeSeries_day(city+\"_timeSeries\",timeSeries['Bookings'+city])\n\n        df_n = pd.read_csv(r\"C:/Users/kevin/Documents/PoliTo/SMART_MOBILITY/\"+city+\".csv\", sep=\",\", parse_dates=[0], infer_datetime_format = True, date_parser=dateparse, index_col = 0)\n\n        add_miss(time_series_df)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/LAB2.py b/LAB2.py
+--- a/LAB2.py	(revision 63d283a7212973617b28a8e7461126ccaa23df07)
++++ b/LAB2.py	(date 1702725321577)
+@@ -14,56 +14,49 @@
+ 
+     return target_date.strftime('%d')
+ 
+-def timeSeries_day(title,Bookings):
+-       listBookings = list(Bookings)
+-       DFBookings=pd.DataFrame(listBookings)
+-       labels=[]
+-       ticks=[]
++def timeSeries_day(title, Bookings):
++    listBookings = list(Bookings)
++    DFBookings = pd.DataFrame(listBookings)
++    labels = []
++    ticks = []
+ 
+-       for i in range(DFBookings.shape[0]):
+-              if i == (DFBookings.shape[0]-1):
+-                     break
+-              elif (DFBookings["_id"][i]["hour"]==0) or ((DFBookings["_id"][i+1]["dow"]-DFBookings["_id"][i]["dow"])!=0) and ((DFBookings["_id"][i+1]["dow"] - DFBookings["_id"][i]["dow"])!=1):
+-                     ticks.append(i)
+-                     formatted_date = day_of_year_to_date( DFBookings["_id"][i+1]["dow"], 2017)
+-                     labels.append(formatted_date)
++    for i in range(DFBookings.shape[0]):
++        if i == (DFBookings.shape[0] - 1):
++            break
++        elif (DFBookings["_id"][i]["hour"] == 0) or (
++                (DFBookings["_id"][i + 1]["dow"] - DFBookings["_id"][i]["dow"]) != 0) and (
++                (DFBookings["_id"][i + 1]["dow"] - DFBookings["_id"][i]["dow"]) != 1):
++            ticks.append(i)
++            formatted_date = day_of_year_to_date(DFBookings["_id"][i + 1]["dow"], 2017)
++            labels.append(formatted_date)
+ 
+-                    #  if formatted_date == '01':
+-                    #        ticks.append(0)
+-                    #        labels.append("02")
+-
+-                    #  if formatted_date == '23':
+-                    #        ticks.append(0)
+-                    #        labels.append("24")
+-
+-       plt.figure()
+-       plt.xlabel("Days of October")
+-       plt.ylabel("N. of Bookings")
+-       plt.title(title)
+-       plt.plot(DFBookings["totOFbookings"],label="Bookings")
+-       plt.xticks(ticks=ticks,
+-                  labels=labels,
+-                  rotation=-30)
+-       plt.legend(loc='best')
+-       plt.grid(True,which="both")
+-       #plt.show()
++    plt.figure()
++    plt.xlabel("Days of October")
++    plt.ylabel("N. of Bookings")
++    plt.title(title)
++    plt.plot(DFBookings["totOFbookings"], label="Bookings")
++    plt.xticks(ticks=ticks,
++               labels=labels,
++               rotation=-30)
++    plt.legend(loc='best')
++    plt.grid(True, which="both")
+ 
+-       DFBookings.columns = ['time','rentals']
++    DFBookings.columns = ['time', 'rentals']
+ 
+-       df = DFBookings.to_csv(path_or_buf = "C:/Users/kevin/Documents/PoliTo/SMART_MOBILITY/"+title+".csv", index = False)
++    df = DFBookings.to_csv(path_or_buf="/Users/maestro_federico/Desktop/SMART_MOBILITY_LABS" + title + ".csv", index=False)
+ 
+-       return df
++    # Restituisci il DataFrame desiderato
++    return DFBookings
+ 
+ def add_miss(df):
+-    
+-    df_new = pd.DataFrame(columns=['time', 'rental'])
++    df_new = pd.DataFrame(columns=['time', 'rentals'])
+     for i in range(1, len(df), 1):
+         if (str(df.index[i] - df.index[i - 1]) != '0 days 01:00:00'):
+             s = pd.date_range(df.index[i - 1], df.index[i], freq='1H')
+             for j in range(1, len(s) - 1):
+-                newvalue = df.iloc[i + j - 24].rental +10 * np.random.random_sample() / 100.0
++                newvalue = df.iloc[i + j - 24].rental + 10 * np.random.random_sample() / 100.0
+                 print('Fitting', i, j, newvalue)
+-                df_new = df_new.append({'Time': s[j], 'rental': newvalue}, ignore_index = True)
++                df_new = df_new.append({'time': s[j], 'rentals': newvalue}, ignore_index=True)
+     df_new = df_new.set_index('time')
+     df = df.append(df_new)
+     df = df.sort_index()
+@@ -73,14 +66,33 @@
+     plt.xlabel('Date')
+     plt.ylabel('Number of rentals')
+     plt.xticks(rotation=50)
+-    plt.grid(linestyle = '--', linewidth=0.8)
++    plt.grid(linestyle='--', linewidth=0.8)
+ 
+     plt.show();
+ 
+     df.plot(title="Rentals in AMSTERDAM")
+ 
++    return df
++
++""""
++def dateparse(tc):
++    return pd.to_datetime.fromtimestamp(float(tc)*3600)
++"""
++
++
++def dateparse(tc):
++    # Trasforma la stringa del dizionario in un dizionario Python
++    timestamp_dict = eval(tc)
+ 
++    # Estrai il valore di "dow" e "hour" dal dizionario
++    dow = timestamp_dict.get("dow", 0)
++    hour = timestamp_dict.get("hour", 0)
+ 
++    # Calcola il timestamp in secondi
++    timestamp = dow * 24 * 3600 + hour * 3600
++
++    # Converti in un oggetto datetime
++    return pd.to_datetime(timestamp, unit='s')
+ 
+ 
+ if __name__ == "__main__":
+@@ -157,8 +169,22 @@
+                 
+                 }])
+ 
+-        time_series_df = timeSeries_day(city+"_timeSeries",timeSeries['Bookings'+city])
++        time_series_df = timeSeries_day(city + "_timeSeries", timeSeries['Bookings' + city])
+ 
+-        df_n = pd.read_csv(r"C:/Users/kevin/Documents/PoliTo/SMART_MOBILITY/"+city+".csv", sep=",", parse_dates=[0], infer_datetime_format = True, date_parser=dateparse, index_col = 0)
++        # Usa il DataFrame effettivo contenente i dati aggregati
++        df_n = pd.read_csv(r"/Users/maestro_federico/Desktop/SMART_MOBILITY_LABS" + city + "_timeSeries.csv", sep=",",
++                           parse_dates=[0], infer_datetime_format=True, date_parser=dateparse, index_col=0)
++
++        print(df_n.columns)
++        # Assicurati di utilizzare la corretta colonna per la trama
++        plt.plot(df_n["rentals"], label="Bookings")
++        plt.show()
++
++
++        #time_series_df = timeSeries_day(city+"_timeSeries",timeSeries['Bookings'+city])
++
++        #df_n = pd.read_csv(r"/Users/maestro_federico/Desktop/SMART_MOBILITY_LABS"+city+"_timeSeries.csv", sep=",", parse_dates=[0], infer_datetime_format = True, date_parser=dateparse, index_col = 0)
++
++        #add_miss(time_series_df)
+ 
+-        add_miss(time_series_df)
+\ No newline at end of file
++    #df_n = add_miss(timeSeries_day(city + "_timeSeries", timeSeries['Bookings' + city]))
+\ No newline at end of file
