@@ -459,6 +459,90 @@ def heat_map (results):
     order = (p, d, q)
     print("BEST: ", order)
 
+    return order, p,q
+
+
+def N_variation (test,p,q):
+    d = 0
+    order = (p,d,q)
+    results = {"N": [], "window": [], "mse": [], "mae": [], "mape": [], "mpe": []}
+    comb = 0
+    train_size = [24 * x for x in range(7, 23)]
+    test_len = len(test)
+    predictions = np.zeros(((len(train_size) * 2), test_len))
+    window = [0, 1]
+    for N in train_size:
+        for w in window:
+
+
+            try:
+                if w == 0:
+                    a = 'Expanding Window'
+                else:
+                    a = 'Sliding Window'
+                print(f'Testing ARIMA best order, size: {N} hours and {a}')
+                train, test = data[0:N], data[N:(N + test_len)]
+
+                history = [x for x in train]
+
+                for t in range(0, test_len):
+                    model = ARIMA(history, order=order)
+                    model_fit = model.fit( method='statespace')
+                    output = model_fit.forecast()
+
+                    yhat = output [0]
+
+                    predictions[comb][t] = yhat
+                    obs = test[t]
+                    if w == 0:
+                        history.append(obs)  # expanding window
+                    else:
+                        history = history[1:]  # to make sliding window
+                print("(%i,%i,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p, d, q,
+                                                                                   mean_absolute_error(test, predictions[comb]),
+                mean_squared_error(test, predictions[comb]), r2_score(test, predictions[comb])))
+                mae = mean_absolute_error(test, predictions[comb])
+                mape = mae / np.mean(test) * 100
+                adder = [(a - b) / a for a, b in zip(test, predictions[comb])]
+                mpe = (100 / test_len) * np.sum(adder)
+                results["N"].append(N)
+                results["window"].append(w)
+                results["mse"].append(mean_squared_error(test, predictions[comb]))
+                results["mae"].append(mean_absolute_error(test, predictions[comb]))
+                results["mape"].append(mape)
+                results["mpe"].append(mpe)
+                comb += 1
+            except:
+                pass
+
+
+    results = pd.DataFrame(results)
+    mape_expanding = results.pivot(index='N', columns='window', values='mape')
+    print(mape_expanding)
+    plt.figure(constrained_layout=True)
+    plt.plot(mape_expanding, linestyle='-', marker='o', markersize=4)
+    plt.title('Mean absolute percentage error of ')
+    plt.xticks(train_size)
+    plt.xlabel(r'N$_{\mathrm{train}}$' + ' (hours)')
+    plt.ylabel("MAPE")
+    plt.legend(["Expanding window", "Sliding window"])
+    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.show()
+
+    best = results["mape"].idxmin()
+    N = results.loc[best]['N'].astype(int)
+    window = results.loc[best]['window'].astype(int)
+    if window == 0:
+        window = 'Expanding Window'
+    else:
+        window = 'Sliding Window'
+    print("BEST: N: %d, window: %s " % (N, window))
+
+
+
+
+
+
 
 
 
@@ -486,7 +570,7 @@ if __name__ == "__main__":
     db = client['carsharing']
     Bookings = db['PermanentBookings']
 
-    cities = ["Milano"]
+    cities = ["Amsterdam"]
 
     # ---------------------------------------------------------------------------------------------
 
@@ -565,6 +649,8 @@ if __name__ == "__main__":
         #variation(df_miss,"variation over coefficient p",2,0)
         results = variation_p_d(df_miss)
 
-        heat_map(results)
+        order, p, q = heat_map(results)
+
+        N_variation(test,p,q)
 
         
