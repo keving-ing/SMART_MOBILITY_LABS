@@ -377,6 +377,59 @@ def variation(df,title,q,d):
     plt.grid(linestyle = '--', linewidth=0.8)
     plt.show()
 
+def variation_p_d(df):
+
+
+    data = df['totOFbookings'].values.astype(float)
+    train, test = data[0:7 * 24], data[7 * 24:(2 * 7 * 24)]
+    test_len = len(test)
+
+    N = 7 * 24  # amount of data for training train, test = data[0:N], data[N:(2*N)] test_len = len(test)
+    lag_orders = (1, 2, 3, 4, 5)
+    MA_orders = (1, 2, 3, 4, 5)
+    # predictions = np.zeros((len(lag_orders), test_len))
+    predictions = np.zeros(((len(lag_orders) * len(MA_orders)), test_len))
+    results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": [], "mpe": []}
+    combinations = range(0, (len(lag_orders) * len(MA_orders)))
+
+
+    comb = 0
+    for p in lag_orders:
+        for q in MA_orders:
+            print('Testing ARIMA order (%i, %i, %i)' % (p, 0, q))
+            train, test = data[0:N], data[N:(N + test_len)]
+            history = [x for x in train]
+            try:
+                for t in range(0, test_len):
+                    model = ARIMA(history, order=(p, 0, q))
+                    model_fit = model.fit( method='statespace')
+                    output = model_fit.forecast()
+                    yhat = output[0]
+                    predictions[comb][t] = yhat
+                    obs = test[t]
+                    history.append(obs)  # expanding window #to make sliding window
+    # history = history[1:]
+                print("(%i,%i,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p, 0, q,
+                                                                                  mean_absolute_error(test, predictions[comb]),
+                mean_squared_error(test, predictions[comb]), r2_score(test, predictions[comb])))
+                mae = mean_absolute_error(test, predictions[comb])
+                mape = mae / np.mean(test) * 100
+                adder = [(a - b) / a for a, b in zip(test, predictions[comb])]
+                mpe = (100 / test_len) * np.sum(adder)
+                results["p"].append(p)
+                results["d"].append(d)
+                results["q"].append(q)
+                results["mse"].append(mean_squared_error(test, predictions[comb]))
+                results["mae"].append(mean_absolute_error(test, predictions[comb]))
+                results["mape"].append(mape)
+                results["mpe"].append(mpe)
+                comb += 1
+            except:
+                pass
+            
+
+
+
 
 
 
@@ -475,5 +528,6 @@ if __name__ == "__main__":
         train, test, data = split(df_miss)
 
         model_training(train, test, data, city)
-        variation(df_miss,"variation over coefficient p",2,0)
+        #variation(df_miss,"variation over coefficient p",2,0)
+        variation_p_d(df_miss)
         
