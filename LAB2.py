@@ -310,12 +310,7 @@ def variation(df,title,q,d):
     except Exception as e:
         print(f"Si è verificata un'eccezione di tipo {type(e).__name__}: {str(e)}")
         pass
-    # Altre azioni o gestione dell'eccezione specifica
 
-
-
-
-#plot
     plt.plot(test,color = 'black', label = "Original")
     for p in p_var:
         print("(%i,0,2) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" %(p,
@@ -344,7 +339,7 @@ def variation(df,title,q,d):
  # %% Parameter q variation
     # testing
 
-    p = 1  # insert the p with lowest error here
+    p = 2  # insert the p with lowest error here
     MA_orders = (1, 2, 3)
     predictions = np.zeros((len(p_var), len_test))
     for q in MA_orders:
@@ -357,8 +352,8 @@ def variation(df,title,q,d):
             output = model_fit.forecast()
             yhat = output[0]
             predictions[p_var.index(q)][t] = yhat
-    obs = test[t]
-    history.append(obs)  # expanding window
+            obs = test[t]
+            history.append(obs)  # expanding window
     # plotting and metrics
     plt.plot(test, color="black", label="Original")
     for q in MA_orders:
@@ -374,11 +369,13 @@ def variation(df,title,q,d):
         results["mae"].append(mean_absolute_error(test, predictions[p_var.index(q)]))
         results["mape"].append(mape)
         plt.plot(predictions[p_var.index(q)], label='q=%i' % q)
-    plt.title('Parameter q variation for ' + title)
-    plt.xlabel("Testing hours")
-    plt.ylabel("Number of rentals")  # plt.xticks(rotation=90) plt.legend(loc='best')
-    plt.show()
 
+    plt.title('Parameter q variation for '+ city)
+    plt.xlabel(" hours")
+    plt.ylabel("Number of rentals")
+    plt.legend(loc='best')
+    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.show()
 
 
 
