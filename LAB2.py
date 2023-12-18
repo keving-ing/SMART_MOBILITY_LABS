@@ -386,8 +386,8 @@ def variation_p_d(df):
     test_len = len(test)
 
     N = 7 * 24  # amount of data for training train, test = data[0:N], data[N:(2*N)] test_len = len(test)
-    lag_orders = (1, 2, 3, 4, 5)
-    MA_orders = (1, 2, 3, 4, 5)
+    lag_orders = (1, 2,3,4,5)
+    MA_orders = (1, 2,3,4,5)
     # predictions = np.zeros((len(lag_orders), test_len))
     predictions = np.zeros(((len(lag_orders) * len(MA_orders)), test_len))
     results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": [], "mpe": []}
@@ -418,7 +418,7 @@ def variation_p_d(df):
                 adder = [(a - b) / a for a, b in zip(test, predictions[comb])]
                 mpe = (100 / test_len) * np.sum(adder)
                 results["p"].append(p)
-                results["d"].append(d)
+                results["d"].append(0)
                 results["q"].append(q)
                 results["mse"].append(mean_squared_error(test, predictions[comb]))
                 results["mae"].append(mean_absolute_error(test, predictions[comb]))
@@ -434,23 +434,25 @@ def heat_map (results):
     results_df = pd.DataFrame(results)
 
     # MAPE
-    fig = plt.figure()
+    plt.figure()
     heat_df_mpe = results_df.pivot(index='p', columns='q', values='mape')
     ax = sns.heatmap(heat_df_mpe, annot=True, linewidths=.5, fmt='.3f')
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.title('MAPE heatmap ')
+    plt.show()
 
     # MPE
-    fig = plt.figure()
-    heat_df_mpe = results.pivot(index='p', columns='q', values='mpe')
+    plt.figure()
+    heat_df_mpe = results_df.pivot(index='p', columns='q', values='mpe')
     ax = sns.heatmap(heat_df_mpe, annot=True, linewidths=.5, fmt='.2f')
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
     plt.title('MPE heatmap ')
+    plt.show()
 
     # %% Select best model with lower MPE
-    best = results["mape"].idxmin()
+    best = results_df["mape"].idxmin()
     p = results_df.loc[best]['p'].astype(int)
     d = 0
     q = results_df.loc[best]['q'].astype(int)
@@ -562,5 +564,7 @@ if __name__ == "__main__":
 
         #variation(df_miss,"variation over coefficient p",2,0)
         results = variation_p_d(df_miss)
+
+        heat_map(results)
 
         
