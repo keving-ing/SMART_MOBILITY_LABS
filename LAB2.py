@@ -10,6 +10,7 @@ import mne
 import io
 import json
 from statsmodels.tsa.arima.model import ARIMA
+import seaborn as sns
 from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
 
 from sklearn.metrics import (mean_squared_error, mean_absolute_error,
@@ -430,7 +431,31 @@ def variation_p_d(df):
     return results
 
 def heat_map (results):
-    return
+    results_df = pd.DataFrame(results)
+
+    # MAPE
+    fig = plt.figure()
+    heat_df_mpe = results_df.pivot(index='p', columns='q', values='mape')
+    ax = sns.heatmap(heat_df_mpe, annot=True, linewidths=.5, fmt='.3f')
+    bottom, top = ax.get_ylim()
+    ax.set_ylim(bottom + 0.5, top - 0.5)
+    plt.title('MAPE heatmap ')
+
+    # MPE
+    fig = plt.figure()
+    heat_df_mpe = results.pivot(index='p', columns='q', values='mpe')
+    ax = sns.heatmap(heat_df_mpe, annot=True, linewidths=.5, fmt='.2f')
+    bottom, top = ax.get_ylim()
+    ax.set_ylim(bottom + 0.5, top - 0.5)
+    plt.title('MPE heatmap ')
+
+    # %% Select best model with lower MPE
+    best = results["mape"].idxmin()
+    p = results_df.loc[best]['p'].astype(int)
+    d = 0
+    q = results_df.loc[best]['q'].astype(int)
+    order = (p, d, q)
+    print("BEST: ", order)
 
 
 
@@ -459,7 +484,7 @@ if __name__ == "__main__":
     db = client['carsharing']
     Bookings = db['PermanentBookings']
 
-    cities = ["Denver", "Amsterdam", "Milano"]
+    cities = ["Milano"]
 
     # ---------------------------------------------------------------------------------------------
 
