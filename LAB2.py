@@ -426,7 +426,13 @@ def variation_p_d(df):
                 comb += 1
             except:
                 pass
-            
+
+    return results
+
+def heat_map (results):
+    return
+
+
 
 
 
@@ -528,6 +534,8 @@ if __name__ == "__main__":
         train, test, data = split(df_miss)
 
         model_training(train, test, data, city)
+
         #variation(df_miss,"variation over coefficient p",2,0)
-        variation_p_d(df_miss)
+        results = variation_p_d(df_miss)
+
         
