@@ -432,6 +432,7 @@ def variation_p_d(df):
 
 def heat_map (results):
     results_df = pd.DataFrame(results)
+    print(results_df)
 
     # MAPE
     plt.figure()
@@ -537,6 +538,65 @@ def N_variation (test,p,q):
     else:
         window = 'Sliding Window'
     print("BEST: N: %d, window: %s " % (N, window))
+    return N
+
+
+def testing_model(N, test, order,p,q,df):
+    train, test = data[0:N], data[N:(N+len(test))]
+
+    history = train.astype(float)
+    predictions = []
+    for t in range(0, len(test)):
+        model = ARIMA(history, order= order)
+        model_fit = model.fit(method='statespace')
+        output = model_fit.forecast()
+        yhat = output[0]
+        predictions.append(yhat)
+        obs = test[t]
+        history = np.append(history,obs) #expanding window
+
+    
+    plt.plot(test, label='Original')
+    plt.plot(predictions, color = "red", label='Forecasted')
+    plt.title('Original/Forecast timeseries of '+city+' - Testing phase')
+    plt.xlabel("Date")
+    plt.ylabel("Number of rentals")
+    plt.xticks(rotation=50)
+    plt.legend(loc='best')
+    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.show()
+    mae = mean_absolute_error(test,predictions)
+    mape = mae/np.mean(test)*100
+    print("TEST DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" %(p,q,
+                                                                                                 mean_absolute_error(test,predictions), mean_squared_error(test,predictions),
+                                                                                                 r2_score(test,predictions), mape))
+    
+    #%% Make predictions
+    train, test = df['totOFbookings'][-N:], df['totOFbookings'][-len(test):]
+    history = [x for x in train]
+    predictions = np.zeros((len(train), len(test)))
+    model = ARIMA(train.astype(float), order=order)
+    model_fit= model.fit(method='statespace')
+    t_start=pd.to_datetime("2017-11-1 00:00:00")
+    t_end=pd.to_datetime("2017-11-30 00:00:00")
+    past=pd.Timedelta(days=5)
+    future=pd.Timedelta(days=4)
+    fig = model_fit.predict(t_end-past,t_end+future)
+
+    fig, ax = plt.subplots()
+    ax.plot(df[t_end-past:])
+    ax.plot(fig)
+    
+    plt.ylabel("Number of rentals")
+    plt.xlabel("Date")
+    plt.title('Final model forecast for '+city)
+    plt.show()
+    
+    
+
+
+
+
 
 
 
@@ -646,11 +706,12 @@ if __name__ == "__main__":
 
         model_training(train, test, data, city)
 
-        #variation(df_miss,"variation over coefficient p",2,0)
-        results = variation_p_d(df_miss)
+        ###variation(df_miss,"variation over coefficient p",2,0)
+        #results = variation_p_d(df_miss)
 
-        order, p, q = heat_map(results)
+        #order, p, q = heat_map(results)
 
-        N_variation(test,p,q)
+       # N=N_variation(test,p,q)
+        testing_model(480, test, (2,0,2),2,2, df_miss)
 
         
