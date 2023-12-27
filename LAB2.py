@@ -851,6 +851,6 @@ if __name__ == "__main__":
 
 
         testing_model(480, test, (2,0,2),2,2, df_miss, city)
-        testing_model(480, test, (24,0,2),24,2, df_miss, city)
+        testing_model(480, test, (24,0,2),24,2, df_miss, city+' - p=24')
 
         
