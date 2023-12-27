@@ -12,9 +12,8 @@ import json
 from statsmodels.tsa.arima.model import ARIMA
 import seaborn as sns
 from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
-
-from sklearn.metrics import (mean_squared_error, mean_absolute_error,
-                             r2_score)
+from sklearn.metrics import (mean_squared_error, mean_absolute_error,r2_score)
+import os
 
 
 
@@ -24,6 +23,13 @@ def day_of_year_to_date(day_of_year, year):
     target_date = reference_date + timedelta(days=day_of_year - 1)
 
     return target_date.strftime('%d')
+
+
+def day_of_year_to_date_(day_of_year, year):
+    reference_date = datetime(year, 1, 1)
+    target_date = reference_date + timedelta(days=day_of_year - 1)
+
+    return target_date.strftime('%m-%d-%Y')
 
 
 def timeSeries_day(title, Bookings):
@@ -40,7 +46,7 @@ def timeSeries_day(title, Bookings):
             formatted_date = day_of_year_to_date(DFBookings["_id"][i + 1]["dow"], 2017)
             labels.append(formatted_date)
 
-    # plt.figure()
+    # plt.figure(figsize=(10, 6))
     # plt.xlabel("Days of October")
     # plt.ylabel("N. of Bookings")
     # plt.title(title)
@@ -51,13 +57,16 @@ def timeSeries_day(title, Bookings):
     # plt.legend(loc='best')
     # plt.grid(True, which="both")
 
-    # plt.show()
+    # if not os.path.exists("PLOT"):
+    #     os.makedirs("PLOT")
 
+    # title = os.path.join("PLOT", title)
+
+    # plt.savefig(title+'.png', format='png')
     #plt.show()
 
 
     DFBookings.columns = ['_id', 'totOFbookings']
-
     df_result = DFBookings.to_csv(index=False)  # Save to CSV without index
 
     return df_result
@@ -106,7 +115,7 @@ def add_miss(df, title):
             print(df["dow"][i + 1])
             formatted_date = day_of_year_to_date(int(df["dow"][i + 1]), 2017)
             labels.append(formatted_date)
-    # plt.figure()
+    # plt.figure(figsize=(10, 6))
     # plt.xlabel("Days of October")
     # plt.ylabel("N. of Bookings")
     # plt.title(title)
@@ -117,10 +126,13 @@ def add_miss(df, title):
     # plt.legend(loc='best')
     # plt.grid(True, which="both")
 
+    # if not os.path.exists("PLOT"):
+    #     os.makedirs("PLOT")
 
-    
-#NON SCOMMENTARE ERA GIA COMMENTATO***
-    # plt.show()
+    # title = os.path.join("PLOT", title)
+
+    # plt.savefig(title+'.png', format='png')
+    #plt.show()
 
    # plt.show()
 
@@ -135,7 +147,7 @@ def add_miss(df, title):
     #     plt.show()
 
     # df.plot(y='totOFbookings', title="Rentals in AMSTERDAM")
-#NON SCOMMENTARE ERA GIA COMMENTATO***
+
     return df
 
 
@@ -154,47 +166,82 @@ def stationarity(df, title):
 
     df['MA'] = df['totOFbookings'].rolling(24 * 7).mean()  # Moving average
     df['MS'] = df['totOFbookings'].rolling(24 * 7).std()  # Moving std
-    # plt.figure(constrained_layout=True)
-    # plt.plot(df['totOFbookings'], linewidth=1, label='Number of rentals')
-    # plt.plot(df['MA'], linewidth=2, color='r', label='Moving Average')
-    # plt.plot(df['MS'], linewidth=2, label='Moving Std')
-    # plt.title('Moving Average/Std of bookings of ' + title)
-    # plt.xlabel('Date')
-    # plt.ylabel('Number of bookings')
-    # plt.xticks(ticks=ticks,
-    #            labels=labels,
-    #            rotation=-30)
-    # plt.grid(linestyle='--', linewidth=0.8)
-    # plt.legend()
-    # plt.show()
+    plt.figure(constrained_layout=True)
+    plt.plot(df['totOFbookings'], linewidth=1, label='Number of rentals')
+    plt.plot(df['MA'], linewidth=2, color='r', label='Moving Average')
+    plt.plot(df['MS'], linewidth=2, label='Moving Std')
+    plt.title('Moving Average & Standard deviation of bookings of ' + title)
+    plt.xlabel('Date')
+    plt.ylabel('Number of bookings')
+    plt.xticks(ticks=ticks,
+               labels=labels,
+               rotation=-30)
+    plt.grid(linestyle='--', linewidth=0.8)
+    plt.legend()
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+
+    title = os.path.join("PLOT", title)
+
+    plt.savefig(title+'MEAN_&_STD.png', format='png')
+
+
+    #plt.show()
+
 
     return df
 
 
 def autocorrelation(df, title):
-    # plt.figure(constrained_layout=True)
-    # pd.plotting.autocorrelation_plot(df["totOFbookings"])
-    # plt.title(title + '_ACF')
-    # plt.grid()
-    # plt.show()
-    # Zoom in
+    plt.figure(constrained_layout=True)
+    pd.plotting.autocorrelation_plot(df["totOFbookings"])
+    plt.title(title + '_ACF')
+    plt.grid()
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+
+    title = os.path.join("PLOT", title)
+
+    plt.savefig(title+'png', format='png')
+    #plt.show()
+
+
+    #Zoom in
     n_lags = 48
     fig, ax = plt.subplots(constrained_layout=True)
-    # plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
-    # plt.title('Autocorrelation Function of ' + title + '; Lags: %d' % n_lags)
-    # plt.grid(which='both')
-    # plt.xlabel("Lag")
-    # plt.ylabel("Autocorrelation")
-    # plt.show()
-    # %% PACF: it gives us an initial guess on parameter P
+    plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
+    plt.title(title + '_ACF - Lags: %d' % n_lags)
+    plt.grid(which='both')
+    plt.xlabel("Lag")
+    plt.ylabel("Autocorrelation")
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+        title = os.path.join("PLOT", title)
+    
+    title = os.path.join(title)
+
+    plt.savefig(title, format='pdf')
+    #plt.show()
+
     n_lags = 48
     fig, ax = plt.subplots(constrained_layout=True)
-    # plot_pacf(df["totOFbookings"], ax=ax, lags=n_lags)
-    # plt.title('Partial Autocorrelation Function of ' + title + '; Lags: %d' % n_lags)
-    # plt.grid(which='both')
-    # plt.xlabel("Lag")
-    # plt.ylabel("Partial Autocorrelation")
-    # plt.show()
+    plot_pacf(df["totOFbookings"], ax=ax, lags=n_lags)
+    plt.title(title + '_PACF - Lags: %d' % n_lags)
+    plt.grid(which='both')
+    plt.xlabel("Lag")
+    plt.ylabel("Partial Autocorrelation")
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+        title = os.path.join("PLOT", title)
+
+    title = os.path.join(title)
+
+    plt.savefig(title, format='pdf')
+    #plt.show()
 
 def split(df):
     data = df["totOFbookings"].values.astype(float)
@@ -212,15 +259,23 @@ def model_training(train, test, data, title):
 
     # print(model_fit.summary())
 
-    # plt.plot(train, label='Original')
-    # plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
-    # plt.title('Original/Forecast timeseries of ' + title + ' - Training phase')
-    # plt.xlabel("Date")
-    # plt.ylabel("Number of rentals")
-    # plt.xticks(rotation=50)
-    # plt.legend(loc='upper right')
-    # plt.grid(linestyle='--', linewidth=0.8)
-    # plt.show()
+    plt.plot(train, label='Original')
+    plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
+    plt.title('Original/Forecast timeseries of ' + title + ' - Training phase')
+    plt.xlabel("Date")
+    plt.ylabel("Number of rentals")
+    plt.xticks(rotation=50)
+    plt.legend(loc='upper right')
+    plt.grid(linestyle='--', linewidth=0.8)
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+
+    title = os.path.join("PLOT", title)
+
+    plt.savefig(title, format='pdf')
+
+    #plt.show()
 
     ##ERROR METRICS
 
@@ -252,38 +307,64 @@ def model_training(train, test, data, title):
         predictions.append(yhat)
         obs = test[t]
         history = np.append(history, obs)  # expanding window
-    # plots
-    # plt.plot(test, label='Original')
-    # plt.plot(predictions, color="red", label='Forecasted')
-    # plt.title('Original/Forecast timeseries of ' + title + ' - Testing phase')
-    # plt.xlabel("Date")
-    # plt.ylabel("Number of rentals")
-    # plt.xticks(rotation=50)
-    # plt.legend(loc='best')
-    # plt.grid(linestyle='--', linewidth=0.8)
-    # plt.show()
+
+    plt.plot(test, label='Original')
+    plt.plot(predictions, color="red", label='Forecasted')
+    plt.title('Original/Forecast timeseries of ' + title + ' - Testing phase')
+    plt.xlabel("Date")
+    plt.ylabel("Number of rentals")
+    plt.xticks(rotation=50)
+    plt.legend(loc='best')
+    plt.grid(linestyle='--', linewidth=0.8)
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+        title = os.path.join("PLOT", title)
+
+    title = os.path.join(title)
+    plt.savefig(title, format='pdf')
+    #plt.show()
 
     mae = mean_absolute_error(test, predictions)
     mape = mae / np.mean(test[0:len(model_fit.fittedvalues)]) * 100
 
     print(str(mae) + "      " + str(mape))
-    # %% Fitted initial model
-    # plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
-    # plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
-    # plt.title('Original/Forecast timeseries of ' + title)
-    # plt.xlabel("Date")
-    # plt.ylabel("Number of rentals")
-    # plt.xticks(rotation=50)
-    # plt.legend(loc='upper right')
-    # plt.grid(linestyle='--', linewidth=0.8)
+   
+    plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
+    plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
+    plt.title('Original/Forecast timeseries of ' + title)
+    plt.xlabel("Date")
+    plt.ylabel("Number of rentals")
+    plt.xticks(rotation=50)
+    plt.legend(loc='upper right')
+    plt.grid(linestyle='--', linewidth=0.8)
 
-    # residuals = pd.DataFrame(model_fit.resid)
-    # residuals.plot()
-    # residuals.plot(kind='kde')
-    # plt.title('Model Residuals_ARIMA ' + title)
-    # plt.xlabel("Residual")
-    # plt.ylabel("Density")
-    # plt.show()
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+        title = os.path.join("PLOT", title)
+
+    title = os.path.join(title)
+    plt.savefig(title, format='pdf')
+
+
+
+    residuals = pd.DataFrame(model_fit.resid)
+    residuals.plot()
+    residuals.plot(kind='kde')
+    plt.title('Model Residuals_ARIMA ' + title)
+    plt.xlabel("Residual")
+    plt.ylabel("Density")
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+        title = os.path.join("PLOT", title)
+
+    title = os.path.join(title)
+
+    plt.savefig(title, format='pdf')
+
+    
+    #plt.show()
 # TASK7
 def variation(df,title,q,d):
 
@@ -330,12 +411,21 @@ def variation(df,title,q,d):
         results["mape"].append(mape)
         plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
 
+
     plt.title('Parameter p variation for '+ city)
     plt.xlabel(" hours")
     plt.ylabel("Number of rentals")
     plt.legend(loc='best')
     plt.grid(linestyle = '--', linewidth=0.8)
-    plt.show()
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+
+    title = os.path.join("PLOT", title)
+
+    plt.savefig(title, format='pdf')
+
+    #plt.show()
 
  # %% Parameter q variation
     # testing
@@ -376,7 +466,16 @@ def variation(df,title,q,d):
     plt.ylabel("Number of rentals")
     plt.legend(loc='best')
     plt.grid(linestyle = '--', linewidth=0.8)
-    plt.show()
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+        title = os.path.join("PLOT", title)
+
+    title = os.path.join(title)
+
+    plt.savefig(title, format='pdf')
+
+    #plt.show()
 
 def variation_p_d(df):
 
@@ -440,8 +539,16 @@ def heat_map (results):
     ax = sns.heatmap(heat_df_mpe, annot=True, linewidths=.5, fmt='.3f')
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
-    plt.title('MAPE heatmap ')
-    plt.show()
+    plt.title('MAPE heatmap of Milano')
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+
+    title = os.path.join("PLOT", title)
+
+    plt.savefig(title, format='pdf')
+
+    #plt.show()
 
     # MPE
     plt.figure()
@@ -449,8 +556,16 @@ def heat_map (results):
     ax = sns.heatmap(heat_df_mpe, annot=True, linewidths=.5, fmt='.2f')
     bottom, top = ax.get_ylim()
     ax.set_ylim(bottom + 0.5, top - 0.5)
-    plt.title('MPE heatmap ')
-    plt.show()
+    plt.title('MPE heatmap of Milano')
+
+    if not os.path.exists("PLOT"):
+        os.makedirs("PLOT")
+
+    title = os.path.join("PLOT", title)
+
+    plt.savefig(title, format='pdf')
+
+    #plt.show()
 
     # %% Select best model with lower MPE
     best = results_df["mape"].idxmin()
@@ -541,8 +656,9 @@ def N_variation (test,p,q):
     return N
 
 
-def testing_model(N, test, order,p,q,df):
-    train, test = data[0:N], data[N:(N+len(test))]
+def testing_model(N, test, order,p,q,df,city):
+ 
+    train, test = df['totOFbookings'][0:N], df['totOFbookings'][N:(N+len(test))]
 
     history = train.astype(float)
     predictions = []
@@ -554,17 +670,16 @@ def testing_model(N, test, order,p,q,df):
         predictions.append(yhat)
         obs = test[t]
         history = np.append(history,obs) #expanding window
-
+        #plt.plot(predictions, color = "red", label='Forecasted')
+    # plt.plot(test, label='Original')
     
-    plt.plot(test, label='Original')
-    plt.plot(predictions, color = "red", label='Forecasted')
-    plt.title('Original/Forecast timeseries of '+city+' - Testing phase')
-    plt.xlabel("Date")
-    plt.ylabel("Number of rentals")
-    plt.xticks(rotation=50)
-    plt.legend(loc='best')
-    plt.grid(linestyle = '--', linewidth=0.8)
-    plt.show()
+    # plt.title('Original/Forecast timeseries of '+city+' - Testing phase')
+    # plt.xlabel("Date")
+    # plt.ylabel("Number of rentals")
+    # plt.xticks(rotation=50)
+    # plt.legend(loc='best')
+    # plt.grid(linestyle = '--', linewidth=0.8)
+    # #plt.show()
     mae = mean_absolute_error(test,predictions)
     mape = mae/np.mean(test)*100
     print("TEST DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" %(p,q,
@@ -572,25 +687,34 @@ def testing_model(N, test, order,p,q,df):
                                                                                                  r2_score(test,predictions), mape))
     
     #%% Make predictions
+
+    print(df.columns)
     train, test = df['totOFbookings'][-N:], df['totOFbookings'][-len(test):]
     history = [x for x in train]
     predictions = np.zeros((len(train), len(test)))
     model = ARIMA(train.astype(float), order=order)
     model_fit= model.fit(method='statespace')
-    t_start=pd.to_datetime("2017-11-1 00:00:00")
-    t_end=pd.to_datetime("2017-11-30 00:00:00")
+
+
+    t_start=pd.to_datetime("2017-11-15 00:00:00")
+    t_end=pd.to_datetime("2017-10-31 00:00:00")
     past=pd.Timedelta(days=5)
     future=pd.Timedelta(days=4)
-    fig = model_fit.predict(t_end-past,t_end+future)
-
-    fig, ax = plt.subplots()
-    ax.plot(df[t_end-past:])
-    ax.plot(fig)
     
-    plt.ylabel("Number of rentals")
-    plt.xlabel("Date")
+    #predict_index = pd.date_range(t_end - past, t_end + future, freq='D')
+    #predict = model_fit.predict(start=predict_index[0], end=predict_index[-1])
+    predict = model_fit.predict(t_end-past,t_end+future)
+
+    df.index = pd.to_datetime(df.index)
+    fig, ax = plt.subplots(1,figsize=(15,5)) 
+    ax.plot(df['totOFbookings'].loc[t_end - past:], label='Original') # plot the actual data up to now
+    ax.plot(predict, label='Prediction') # plot now the predicted data for the future days
     plt.title('Final model forecast for '+city)
-    plt.show()
+    plt.ylabel("Number of rentals")
+    plt.legend(loc='best')
+
+    
+    plt.show()    
     
     
 
@@ -696,22 +820,34 @@ if __name__ == "__main__":
 
         df_miss = add_miss(pd.read_csv(io.StringIO(df)), city + "_timeSeries with missed data")
 
-        df_stat = stationarity(df_miss, city)
-        df_autoc = autocorrelation(df_miss, city)
+        #df_stat = stationarity(df_miss, city)
+        #df_autoc = autocorrelation(df_miss, city)
         # %% Fitting the model with initial guess #choose the order of the initial model
 
-        split(df_miss)
 
         train, test, data = split(df_miss)
 
-        model_training(train, test, data, city)
 
-        ###variation(df_miss,"variation over coefficient p",2,0)
-        #results = variation_p_d(df_miss)
+        colonne_da_rimuovere = ['dow', 'hour', 'MA', 'MS']
 
-        #order, p, q = heat_map(results)
+ 
+        #df_miss = df_miss.drop(colonne_da_rimuovere, axis=1)
 
-       # N=N_variation(test,p,q)
-        testing_model(480, test, (2,0,2),2,2, df_miss)
+
+
+        df_miss['_id'] = df_miss['_id'].apply(lambda x: eval(x) if isinstance(x, str) else x)
+        df_miss['_id'] = df_miss['_id'].apply(lambda x: day_of_year_to_date_(int(x['dow']), 2017) + (f" {str(x['hour']).zfill(2)}:00:00" if 'hour' in x else ''))
+        #df_miss['totOFbookings'] = pd.to_datetime(df_miss['totOFbookings'], errors='coerce')
+        df_miss = df_miss.set_index('_id')
+
+
+        #df_miss['_id'] = pd.to_datetime(df_miss['_id'], errors='coerce')
+        #df_miss['totOFbookings'].index = df_miss['_id']
+        #df_miss['totOFbookings'] = df_miss['totOFbookings'].set_index('_id')
+
+
+
+
+        testing_model(480, test, (2,0,2),2,2, df_miss, city)
 
         
