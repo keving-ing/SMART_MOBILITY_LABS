@@ -1,3 +1,5 @@
+from tkinter import N
+
 import pymongo as pm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,10 +14,8 @@ import json
 from statsmodels.tsa.arima.model import ARIMA
 import seaborn as sns
 from statsmodels.graphics.tsaplots import plot_pacf, plot_acf
-from sklearn.metrics import (mean_squared_error, mean_absolute_error,r2_score)
+from sklearn.metrics import (mean_squared_error, mean_absolute_error, r2_score)
 import os
-
-
 
 
 def day_of_year_to_date(day_of_year, year):
@@ -63,8 +63,7 @@ def timeSeries_day(title, Bookings):
     # title = os.path.join("PLOT", title)
 
     # plt.savefig(title+'.png', format='png')
-    #plt.show()
-
+    # plt.show()
 
     DFBookings.columns = ['_id', 'totOFbookings']
     df_result = DFBookings.to_csv(index=False)  # Save to CSV without index
@@ -132,10 +131,9 @@ def add_miss(df, title):
     # title = os.path.join("PLOT", title)
 
     # plt.savefig(title+'.png', format='png')
-    #plt.show()
+    # plt.show()
 
-   # plt.show()
-
+    # plt.show()
 
     #     plt.plot(df['totOFbookings'])
     #     plt.title('Filled rentals timeseries')
@@ -149,7 +147,6 @@ def add_miss(df, title):
     # df.plot(y='totOFbookings', title="Rentals in AMSTERDAM")
 
     return df
-
 
 
 def stationarity(df, title):
@@ -184,11 +181,9 @@ def stationarity(df, title):
 
     title = os.path.join("PLOT", title)
 
-    plt.savefig(title+'MEAN_&_STD.png', format='png')
+    plt.savefig(title + 'MEAN_&_STD.png', format='png')
 
-
-    #plt.show()
-
+    # plt.show()
 
     return df
 
@@ -204,11 +199,10 @@ def autocorrelation(df, title):
 
     title = os.path.join("PLOT", title)
 
-    plt.savefig(title+'png', format='png')
-    #plt.show()
+    plt.savefig(title + 'png', format='png')
+    # plt.show()
 
-
-    #Zoom in
+    # Zoom in
     n_lags = 48
     fig, ax = plt.subplots(constrained_layout=True)
     plot_acf(df["totOFbookings"], ax=ax, lags=n_lags)
@@ -220,11 +214,11 @@ def autocorrelation(df, title):
     if not os.path.exists("PLOT"):
         os.makedirs("PLOT")
         title = os.path.join("PLOT", title)
-    
+
     title = os.path.join(title)
 
     plt.savefig(title, format='pdf')
-    #plt.show()
+    # plt.show()
 
     n_lags = 48
     fig, ax = plt.subplots(constrained_layout=True)
@@ -241,7 +235,8 @@ def autocorrelation(df, title):
     title = os.path.join(title)
 
     plt.savefig(title, format='pdf')
-    #plt.show()
+    # plt.show()
+
 
 def split(df):
     data = df["totOFbookings"].values.astype(float)
@@ -275,7 +270,7 @@ def model_training(train, test, data, title):
 
     plt.savefig(title, format='pdf')
 
-    #plt.show()
+    # plt.show()
 
     ##ERROR METRICS
 
@@ -323,13 +318,13 @@ def model_training(train, test, data, title):
 
     title = os.path.join(title)
     plt.savefig(title, format='pdf')
-    #plt.show()
+    # plt.show()
 
     mae = mean_absolute_error(test, predictions)
     mape = mae / np.mean(test[0:len(model_fit.fittedvalues)]) * 100
 
     print(str(mae) + "      " + str(mape))
-   
+
     plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
     plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
     plt.title('Original/Forecast timeseries of ' + title)
@@ -346,8 +341,6 @@ def model_training(train, test, data, title):
     title = os.path.join(title)
     plt.savefig(title, format='pdf')
 
-
-
     residuals = pd.DataFrame(model_fit.resid)
     residuals.plot()
     residuals.plot(kind='kde')
@@ -363,60 +356,60 @@ def model_training(train, test, data, title):
 
     plt.savefig(title, format='pdf')
 
-    
-    #plt.show()
+    # plt.show()
+
+
 # TASK7
-def variation(df,title,q,d):
+def variation(df, title, q, d):
+    data = df['totOFbookings'].values.astype(float)
+    train, test = data[0:7 * 24], data[7 * 24:(2 * 7 * 24)]
+    len_test = len(test)
+    p_var = (1, 2, 3)
 
-    data=df['totOFbookings'].values.astype(float)
-    train,test= data[0:7*24], data [7*24:(2*7*24)]
-    len_test=len(test)
-    p_var=(1,2,3)
-
-    predictions = np.zeros((len(p_var),len_test))
+    predictions = np.zeros((len(p_var), len_test))
     results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": []}
     try:
         for p in p_var:
-            print('Testing ARIMA order (%i, 0, %i)' % (p,q))
-            train, test = data[0:7*24], data[7*24:(7*24+len_test)]
+            print('Testing ARIMA order (%i, 0, %i)' % (p, q))
+            train, test = data[0:7 * 24], data[7 * 24:(7 * 24 + len_test)]
             history = [x for x in train]
             for t in range(0, len_test):
-                model = ARIMA(history, order= (p, d, q))
-                model_fit = model.fit( method='statespace')
+                model = ARIMA(history, order=(p, d, q))
+                model_fit = model.fit(method='statespace')
                 output = model_fit.forecast()
                 yhat = output[0]
                 predictions[p_var.index(p)][t] = yhat
                 obs = test[t]
-                history.append(obs) #expanding window
-                history=history[1:]
+                history.append(obs)  # expanding window
+                history = history[1:]
     except Exception as e:
         print(f"Si è verificata un'eccezione di tipo {type(e).__name__}: {str(e)}")
         pass
 
-    plt.plot(test,color = 'black', label = "Original")
+    plt.plot(test, color='black', label="Original")
     for p in p_var:
-        print("(%i,0,2) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" %(p,
-                                                                       mean_absolute_error(test,predictions[p_var.index(p)]),
-                                                                       mean_squared_error(test,predictions[p_var.index(p)]),
-                                                                       r2_score(test,predictions[p_var.index(p)])))
+        print("(%i,0,2) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p,
+                                                                        mean_absolute_error(test, predictions[
+                                                                            p_var.index(p)]),
+                                                                        mean_squared_error(test,
+                                                                                           predictions[p_var.index(p)]),
+                                                                        r2_score(test, predictions[p_var.index(p)])))
 
-
-        mae = mean_absolute_error(test,predictions[p_var.index(p)])
-        mape = mae/np.mean(test)*100
+        mae = mean_absolute_error(test, predictions[p_var.index(p)])
+        mape = mae / np.mean(test) * 100
         results["p"].append(p)
         results["d"].append(0)
         results["q"].append(2)
-        results["mse"].append(mean_squared_error(test,predictions[p_var.index(p)]))
-        results["mae"].append(mean_absolute_error(test,predictions[p_var.index(p)]))
+        results["mse"].append(mean_squared_error(test, predictions[p_var.index(p)]))
+        results["mae"].append(mean_absolute_error(test, predictions[p_var.index(p)]))
         results["mape"].append(mape)
-        plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
+        plt.plot(predictions[p_var.index(p)], label='p=%i' % p)
 
-
-    plt.title('Parameter p variation for '+ city)
+    plt.title('Parameter p variation for ' + city)
     plt.xlabel(" hours")
     plt.ylabel("Number of rentals")
     plt.legend(loc='best')
-    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.grid(linestyle='--', linewidth=0.8)
 
     if not os.path.exists("PLOT"):
         os.makedirs("PLOT")
@@ -425,9 +418,9 @@ def variation(df,title,q,d):
 
     plt.savefig(title, format='pdf')
 
-    #plt.show()
+    # plt.show()
 
- # %% Parameter q variation
+    # %% Parameter q variation
     # testing
 
     p = 2  # insert the p with lowest error here
@@ -435,7 +428,7 @@ def variation(df,title,q,d):
     predictions = np.zeros((len(p_var), len_test))
     for q in MA_orders:
         print('Testing ARIMA order (%i, 0, %i)' % (p, q))
-        train, test = data[0:7*24], data[7*24:(7*24 + len_test)]
+        train, test = data[0:7 * 24], data[7 * 24:(7 * 24 + len_test)]
         history = [w for w in train]
         for t in range(0, len_test):
             model = ARIMA(history, order=(p, d, q))
@@ -448,7 +441,8 @@ def variation(df,title,q,d):
     # plotting and metrics
     plt.plot(test, color="black", label="Original")
     for q in MA_orders:
-        print("(%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p, q,mean_absolute_error(test, predictions[p_var.index(q)])
+        print("(%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (
+        p, q, mean_absolute_error(test, predictions[p_var.index(q)])
         , mean_squared_error(test, predictions[p_var.index(q)])
         , r2_score(test, predictions[p_var.index(q)])))
         mae = mean_absolute_error(test, predictions[p_var.index(p)])
@@ -461,11 +455,11 @@ def variation(df,title,q,d):
         results["mape"].append(mape)
         plt.plot(predictions[p_var.index(q)], label='q=%i' % q)
 
-    plt.title('Parameter q variation for '+ city)
+    plt.title('Parameter q variation for ' + city)
     plt.xlabel(" hours")
     plt.ylabel("Number of rentals")
     plt.legend(loc='best')
-    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.grid(linestyle='--', linewidth=0.8)
 
     if not os.path.exists("PLOT"):
         os.makedirs("PLOT")
@@ -475,23 +469,21 @@ def variation(df,title,q,d):
 
     plt.savefig(title, format='pdf')
 
-    #plt.show()
+    # plt.show()
+
 
 def variation_p_d(df):
-
-
     data = df['totOFbookings'].values.astype(float)
     train, test = data[0:7 * 24], data[7 * 24:(2 * 7 * 24)]
     test_len = len(test)
 
     N = 7 * 24  # amount of data for training train, test = data[0:N], data[N:(2*N)] test_len = len(test)
-    lag_orders = (1, 2,3,4,5)
-    MA_orders = (1, 2,3,4,5)
+    lag_orders = (1, 2, 3, 4, 5)
+    MA_orders = (1, 2, 3, 4, 5)
     # predictions = np.zeros((len(lag_orders), test_len))
     predictions = np.zeros(((len(lag_orders) * len(MA_orders)), test_len))
     results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": [], "mpe": []}
     combinations = range(0, (len(lag_orders) * len(MA_orders)))
-
 
     comb = 0
     for p in lag_orders:
@@ -502,16 +494,19 @@ def variation_p_d(df):
             try:
                 for t in range(0, test_len):
                     model = ARIMA(history, order=(p, 0, q))
-                    model_fit = model.fit( method='statespace')
+                    model_fit = model.fit(method='statespace')
                     output = model_fit.forecast()
                     yhat = output[0]
                     predictions[comb][t] = yhat
                     obs = test[t]
                     history.append(obs)  # expanding window #to make sliding window
-    # history = history[1:]
+                # history = history[1:]
                 print("(%i,%i,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p, 0, q,
-                                                                                  mean_absolute_error(test, predictions[comb]),
-                mean_squared_error(test, predictions[comb]), r2_score(test, predictions[comb])))
+                                                                                  mean_absolute_error(test, predictions[
+                                                                                      comb]),
+                                                                                  mean_squared_error(test,
+                                                                                                     predictions[comb]),
+                                                                                  r2_score(test, predictions[comb])))
                 mae = mean_absolute_error(test, predictions[comb])
                 mape = mae / np.mean(test) * 100
                 adder = [(a - b) / a for a, b in zip(test, predictions[comb])]
@@ -529,7 +524,8 @@ def variation_p_d(df):
 
     return results
 
-def heat_map (results):
+
+def heat_map(results,title):
     results_df = pd.DataFrame(results)
     print(results_df)
 
@@ -548,7 +544,7 @@ def heat_map (results):
 
     plt.savefig(title, format='pdf')
 
-    #plt.show()
+    # plt.show()
 
     # MPE
     plt.figure()
@@ -565,7 +561,7 @@ def heat_map (results):
 
     plt.savefig(title, format='pdf')
 
-    #plt.show()
+    # plt.show()
 
     # %% Select best model with lower MPE
     best = results_df["mape"].idxmin()
@@ -575,12 +571,12 @@ def heat_map (results):
     order = (p, d, q)
     print("BEST: ", order)
 
-    return order, p,q
+    return order, p, q
 
 
-def N_variation (test,p,q):
+def N_variation(test, p, q):
     d = 0
-    order = (p,d,q)
+    order = (p, d, q)
     results = {"N": [], "window": [], "mse": [], "mae": [], "mape": [], "mpe": []}
     comb = 0
     train_size = [24 * x for x in range(7, 23)]
@@ -589,7 +585,6 @@ def N_variation (test,p,q):
     window = [0, 1]
     for N in train_size:
         for w in window:
-
 
             try:
                 if w == 0:
@@ -603,10 +598,10 @@ def N_variation (test,p,q):
 
                 for t in range(0, test_len):
                     model = ARIMA(history, order=order)
-                    model_fit = model.fit( method='statespace')
+                    model_fit = model.fit(method='statespace')
                     output = model_fit.forecast()
 
-                    yhat = output [0]
+                    yhat = output[0]
 
                     predictions[comb][t] = yhat
                     obs = test[t]
@@ -615,8 +610,11 @@ def N_variation (test,p,q):
                     else:
                         history = history[1:]  # to make sliding window
                 print("(%i,%i,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" % (p, d, q,
-                                                                                   mean_absolute_error(test, predictions[comb]),
-                mean_squared_error(test, predictions[comb]), r2_score(test, predictions[comb])))
+                                                                                  mean_absolute_error(test, predictions[
+                                                                                      comb]),
+                                                                                  mean_squared_error(test,
+                                                                                                     predictions[comb]),
+                                                                                  r2_score(test, predictions[comb])))
                 mae = mean_absolute_error(test, predictions[comb])
                 mape = mae / np.mean(test) * 100
                 adder = [(a - b) / a for a, b in zip(test, predictions[comb])]
@@ -631,7 +629,6 @@ def N_variation (test,p,q):
             except:
                 pass
 
-
     results = pd.DataFrame(results)
     mape_expanding = results.pivot(index='N', columns='window', values='mape')
     print(mape_expanding)
@@ -642,7 +639,7 @@ def N_variation (test,p,q):
     plt.xlabel(r'N$_{\mathrm{train}}$' + ' (hours)')
     plt.ylabel("MAPE")
     plt.legend(["Expanding window", "Sliding window"])
-    plt.grid(linestyle = '--', linewidth=0.8)
+    plt.grid(linestyle='--', linewidth=0.8)
     plt.show()
 
     best = results["mape"].idxmin()
@@ -656,23 +653,22 @@ def N_variation (test,p,q):
     return N
 
 
-def testing_model(N, test, order,p,q,df,city):
- 
-    train, test = df['totOFbookings'][0:N], df['totOFbookings'][N:(N+len(test))]
+def testing_model(N, test, order, p, q, df, city):
+    train, test = df['totOFbookings'][0:N], df['totOFbookings'][N:(N + len(test))]
 
     history = train.astype(float)
     predictions = []
     for t in range(0, len(test)):
-        model = ARIMA(history, order= order)
+        model = ARIMA(history, order=order)
         model_fit = model.fit(method='statespace')
         output = model_fit.forecast()
         yhat = output[0]
         predictions.append(yhat)
         obs = test[t]
-        history = np.append(history,obs) #expanding window
-        #plt.plot(predictions, color = "red", label='Forecasted')
+        history = np.append(history, obs)  # expanding window
+        # plt.plot(predictions, color = "red", label='Forecasted')
     # plt.plot(test, label='Original')
-    
+
     # plt.title('Original/Forecast timeseries of '+city+' - Testing phase')
     # plt.xlabel("Date")
     # plt.ylabel("Number of rentals")
@@ -680,66 +676,120 @@ def testing_model(N, test, order,p,q,df,city):
     # plt.legend(loc='best')
     # plt.grid(linestyle = '--', linewidth=0.8)
     # #plt.show()
-    mae = mean_absolute_error(test,predictions)
-    mape = mae/np.mean(test)*100
-    print("TEST DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" %(p,q,
-                                                                                                 mean_absolute_error(test,predictions), mean_squared_error(test,predictions),
-                                                                                                 r2_score(test,predictions), mape))
-    
-    #%% Make predictions
+    mae = mean_absolute_error(test, predictions)
+    mape = mae / np.mean(test) * 100
+    print("TEST DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" % (p, q,
+                                                                                                  mean_absolute_error(
+                                                                                                      test,
+                                                                                                      predictions),
+                                                                                                  mean_squared_error(
+                                                                                                      test,
+                                                                                                      predictions),
+                                                                                                  r2_score(test,
+                                                                                                           predictions),
+                                                                                                  mape))
+
+    # %% Make predictions
 
     print(df.columns)
     train, test = df['totOFbookings'][-N:], df['totOFbookings'][-len(test):]
     history = [x for x in train]
     predictions = np.zeros((len(train), len(test)))
     model = ARIMA(train.astype(float), order=order)
-    model_fit= model.fit(method='statespace')
+    model_fit = model.fit(method='statespace')
 
+    t_start = pd.to_datetime("2017-11-15 00:00:00")
+    t_end = pd.to_datetime("2017-10-31 00:00:00")
+    past = pd.Timedelta(days=5)
+    future = pd.Timedelta(days=4)
 
-    t_start=pd.to_datetime("2017-11-15 00:00:00")
-    t_end=pd.to_datetime("2017-10-31 00:00:00")
-    past=pd.Timedelta(days=5)
-    future=pd.Timedelta(days=4)
-    
-    #predict_index = pd.date_range(t_end - past, t_end + future, freq='D')
-    #predict = model_fit.predict(start=predict_index[0], end=predict_index[-1])
-    predict = model_fit.predict(t_end-past,t_end+future)
+    # predict_index = pd.date_range(t_end - past, t_end + future, freq='D')
+    # predict = model_fit.predict(start=predict_index[0], end=predict_index[-1])
+    predict = model_fit.predict(t_end - past, t_end + future)
 
     df.index = pd.to_datetime(df.index)
-    fig, ax = plt.subplots(1,figsize=(15,5)) 
-    ax.plot(df['totOFbookings'].loc[t_end - past:], label='Original') # plot the actual data up to now
-    ax.plot(predict, label='Prediction') # plot now the predicted data for the future days
+    fig, ax = plt.subplots(1, figsize=(15, 5))
+    ax.plot(df['totOFbookings'].loc[t_end - past:], label='Original')  # plot the actual data up to now
+    ax.plot(predict, label='Prediction')  # plot now the predicted data for the future days
     confidence_interval = model_fit.get_forecast(steps=len(predict)).conf_int(alpha=0.05)
-    ax.fill_between(predict.index, confidence_interval.iloc[:, 0], confidence_interval.iloc[:, 1], color='orange', alpha=0.3, label='Confidence Interval - 95%')
+    ax.fill_between(predict.index, confidence_interval.iloc[:, 0], confidence_interval.iloc[:, 1], color='orange',
+                    alpha=0.3, label='Confidence Interval - 95%')
     plt.title('Final prediction for ' + city)
     plt.ylabel("Rentals")
     plt.legend(loc='best')
 
-    
-    plt.show()    
-    
-    
+    plt.show()
 
+    ###TASK 8####
 
+def horizon_time(test, history, predictions):
 
+    # choice a good value
+    t = test
+    p = 1
+    q= 1
+    order = (p, 0, q)
 
+    # Testing time
 
+    predictions = []
 
+    data = df.values.astype(float)
+    results = {'h': [], 'mape': []}
 
+    try:
+        for h in range(1, 25):
+            print('Horizon h = %i' % h)
 
+            train, test = data[0:N], data[N:(N + len(test))]
+            history = [w for w in train]
+            #model = ARIMA(train.astype(float), order=(24, 0, q))
 
+            # model = ARIMA[(history, order=order)]
+            for t in range (0, len(test)):
 
+                model = ARIMA(history, order=order)
+                model_fit = model.fit(method='statespace')
+                output = model_fit.forecast(h)
 
+                yhat = output[0][-1]
+                predictions.append(yhat)
 
+                obs = test[t]
+                history.append(obs)
 
+                # PLOTTING STATISTICS
+                mae = mean_absolute_error(test, predictions[-len(test):])
+                mape = mae / np.mean(test) * 100
 
+                xaxis = range(N, N + len(test))
+                if h == 1:
+                    plt.plot(xaxis, test, label='Test data', color='black')
+                    plt.plot(xaxis, predictions, label='h=%i' % h)
+                    results['h'].append(h)
+                    results['mape'].append(mape)
+                else:
+                    plt.plot(xaxis[h - 1:], predictions[-(len(test) - h + 1):], label='h=%i' % h)
+                    results['h'].append(h)
+                    results['mape'].append(mape)
 
+    except:
+        pass
+    h_results = pd.DataFrame(results)
+    plt.xlabel('Hours')
+    plt.ylabel('Number of rentals')
+    plt.title('Timeseries for different values of h for ' + 'title')
+    plt.grid(linestyle='--', linewidth=0.8)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upperleft')
 
-
-
-     
-
-     
+    plt.figure()
+    plt.plot(h_results['h'], h_results['mape'], '-o')
+    plt.xlabel('h')
+    plt.xticks(h_results['h'].astype(int))
+    plt.ylabel('MAPE')
+    plt.title('MAPE vs h for ' + 'title')
+    plt.grid(linestyle='--', linewidth=0.8)
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -822,35 +872,33 @@ if __name__ == "__main__":
 
         df_miss = add_miss(pd.read_csv(io.StringIO(df)), city + "_timeSeries with missed data")
 
-        #df_stat = stationarity(df_miss, city)
-        #df_autoc = autocorrelation(df_miss, city)
+        # df_stat = stationarity(df_miss, city)
+        # df_autoc = autocorrelation(df_miss, city)
         # %% Fitting the model with initial guess #choose the order of the initial model
-
 
         train, test, data = split(df_miss)
 
-
         colonne_da_rimuovere = ['dow', 'hour', 'MA', 'MS']
 
- 
-        #df_miss = df_miss.drop(colonne_da_rimuovere, axis=1)
-
-
+        # df_miss = df_miss.drop(colonne_da_rimuovere, axis=1)
 
         df_miss['_id'] = df_miss['_id'].apply(lambda x: eval(x) if isinstance(x, str) else x)
-        df_miss['_id'] = df_miss['_id'].apply(lambda x: day_of_year_to_date_(int(x['dow']), 2017) + (f" {str(x['hour']).zfill(2)}:00:00" if 'hour' in x else ''))
-        #df_miss['totOFbookings'] = pd.to_datetime(df_miss['totOFbookings'], errors='coerce')
+        df_miss['_id'] = df_miss['_id'].apply(lambda x: day_of_year_to_date_(int(x['dow']), 2017) + (
+            f" {str(x['hour']).zfill(2)}:00:00" if 'hour' in x else ''))
+        # df_miss['totOFbookings'] = pd.to_datetime(df_miss['totOFbookings'], errors='coerce')
         df_miss = df_miss.set_index('_id')
 
+        # df_miss['_id'] = pd.to_datetime(df_miss['_id'], errors='coerce')
+        # df_miss['totOFbookings'].index = df_miss['_id']
+        # df_miss['totOFbookings'] = df_miss['totOFbookings'].set_index('_id')
 
-        #df_miss['_id'] = pd.to_datetime(df_miss['_id'], errors='coerce')
-        #df_miss['totOFbookings'].index = df_miss['_id']
-        #df_miss['totOFbookings'] = df_miss['totOFbookings'].set_index('_id')
+        testing_model(480, test, (2, 0, 2), 2, 2, df_miss, city)
+        testing_model(480, test, (24, 0, 2), 24, 2, df_miss, city + ' - p=24')
 
+        ##per richiamare il task 8. Rentals non esiste?
+        history = df_miss['rentals'].tolist()
+        test = df_miss['rentals'].tolist()
 
+        predictions = []
 
-
-        testing_model(480, test, (2,0,2),2,2, df_miss, city)
-        testing_model(480, test, (24,0,2),24,2, df_miss, city+' - p=24')
-
-        
+        horizon_time(test, history, predictions)
