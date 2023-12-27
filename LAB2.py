@@ -709,8 +709,10 @@ def testing_model(N, test, order,p,q,df,city):
     fig, ax = plt.subplots(1,figsize=(15,5)) 
     ax.plot(df['totOFbookings'].loc[t_end - past:], label='Original') # plot the actual data up to now
     ax.plot(predict, label='Prediction') # plot now the predicted data for the future days
-    plt.title('Final model forecast for '+city)
-    plt.ylabel("Number of rentals")
+    confidence_interval = model_fit.get_forecast(steps=len(predict)).conf_int(alpha=0.05)
+    ax.fill_between(predict.index, confidence_interval.iloc[:, 0], confidence_interval.iloc[:, 1], color='orange', alpha=0.3, label='Confidence Interval - 95%')
+    plt.title('Final prediction for ' + city)
+    plt.ylabel("Rentals")
     plt.legend(loc='best')
 
     
@@ -849,5 +851,6 @@ if __name__ == "__main__":
 
 
         testing_model(480, test, (2,0,2),2,2, df_miss, city)
+        testing_model(480, test, (24,0,2),24,2, df_miss, city)
 
         
