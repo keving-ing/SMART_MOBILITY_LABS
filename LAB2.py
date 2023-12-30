@@ -248,7 +248,7 @@ def split(df):
 
 ##TASK 6
 def model_training(train, test, data, title):
-    order = (2, 0, 3)  # p = 2 , q = 3
+    order = (1, 0, 3)  # p = 2 , q = 3
     model = ARIMA(train.astype(float), order=order)
     model_fit = model.fit(method='statespace')
 
@@ -257,7 +257,7 @@ def model_training(train, test, data, title):
     plt.plot(train, label='Original')
     plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
     plt.title('Original/Forecast timeseries of ' + title + ' - Training phase')
-    plt.xlabel("Date")
+    plt.xlabel("Hour")
     plt.ylabel("Number of rentals")
     plt.xticks(rotation=50)
     plt.legend(loc='upper right')
@@ -268,7 +268,7 @@ def model_training(train, test, data, title):
 
     mae = mean_absolute_error(train[0:len(model_fit.fittedvalues)], model_fit.fittedvalues)
     mape = mae / np.mean(train[0:len(model_fit.fittedvalues)]) * 100
-    print("TRAIN DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" % (2, 3,
+    print("TRAIN DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" % (1, 3,
                                                                                                    mean_absolute_error(
                                                                                                        train[0:len(
                                                                                                            model_fit.fittedvalues)],
@@ -298,7 +298,7 @@ def model_training(train, test, data, title):
     plt.plot(test, label='Original')
     plt.plot(predictions, color="red", label='Forecasted')
     plt.title('Original/Forecast timeseries of ' + title + ' - Testing phase')
-    plt.xlabel("Date")
+    plt.xlabel("Hour")
     plt.ylabel("Number of rentals")
     plt.xticks(rotation=50)
     plt.legend(loc='best')
@@ -313,7 +313,7 @@ def model_training(train, test, data, title):
     plt.plot(data[0:len(model_fit.fittedvalues)], label='Original')
     plt.plot(model_fit.fittedvalues, color="red", label='Forecasted')
     plt.title('Original/Forecast timeseries of ' + title)
-    plt.xlabel("Date")
+    plt.xlabel("Hour")
     plt.ylabel("Number of rentals")
     plt.xticks(rotation=50)
     plt.legend(loc='upper right')
@@ -336,56 +336,56 @@ def variation(df,title,q,d):
     len_test=len(test)
     p_var=(1,2,3)
 
-    predictions = np.zeros((len(p_var),len_test))
-    results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": []}
-    try:
-        for p in p_var:
-            print('Testing ARIMA order (%i, 0, %i)' % (p,q))
-            train, test = data[0:7*24], data[7*24:(7*24+len_test)]
-            history = [x for x in train]
-            for t in range(0, len_test):
-                model = ARIMA(history, order= (p, d, q))
-                model_fit = model.fit( method='statespace')
-                output = model_fit.forecast()
-                yhat = output[0]
-                predictions[p_var.index(p)][t] = yhat
-                obs = test[t]
-                history.append(obs) #expanding window
-                history=history[1:]
-    except Exception as e:
-        print(f"Si è verificata un'eccezione di tipo {type(e)._name_}: {str(e)}")
-        pass
+    # predictions = np.zeros((len(p_var),len_test))
+    # results = {"p": [], "d": [], "q": [], "mse": [], "mae": [], "mape": []}
+    # try:
+    #     for p in p_var:
+    #         print('Testing ARIMA order (%i, 0, %i)' % (p,q))
+    #         train, test = data[0:7*24], data[7*24:(7*24+len_test)]
+    #         history = [x for x in train]
+    #         for t in range(0, len_test):
+    #             model = ARIMA(history, order= (p, d, q))
+    #             model_fit = model.fit( method='statespace')
+    #             output = model_fit.forecast()
+    #             yhat = output[0]
+    #             predictions[p_var.index(p)][t] = yhat
+    #             obs = test[t]
+    #             history.append(obs) #expanding window
+    #             history=history[1:]
+    # except Exception as e:
+    #     print(f"Si è verificata un'eccezione di tipo {type(e)._name_}: {str(e)}")
+    #     pass
 
-    plt.plot(test,color = 'black', label = "Original")
-    for p in p_var:
-        print("(%i,0,2) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" %(p,
-                                                                       mean_absolute_error(test,predictions[p_var.index(p)]),
-                                                                       mean_squared_error(test,predictions[p_var.index(p)]),
-                                                                       r2_score(test,predictions[p_var.index(p)])))
+    # plt.plot(test,color = 'black', label = "Original")
+    # for p in p_var:
+    #     print("(%i,0,2) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f" %(p,
+    #                                                                    mean_absolute_error(test,predictions[p_var.index(p)]),
+    #                                                                    mean_squared_error(test,predictions[p_var.index(p)]),
+    #                                                                    r2_score(test,predictions[p_var.index(p)])))
 
 
-        mae = mean_absolute_error(test,predictions[p_var.index(p)])
-        mape = mae/np.mean(test)*100
-        results["p"].append(p)
-        results["d"].append(0)
-        results["q"].append(q)
-        results["mse"].append(mean_squared_error(test,predictions[p_var.index(p)]))
-        results["mae"].append(mean_absolute_error(test,predictions[p_var.index(p)]))
-        results["mape"].append(mape)
-        plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
+    #     mae = mean_absolute_error(test,predictions[p_var.index(p)])
+    #     mape = mae/np.mean(test)*100
+    #     results["p"].append(p)
+    #     results["d"].append(0)
+    #     results["q"].append(q)
+    #     results["mse"].append(mean_squared_error(test,predictions[p_var.index(p)]))
+    #     results["mae"].append(mean_absolute_error(test,predictions[p_var.index(p)]))
+    #     results["mape"].append(mape)
+    #     plt.plot(predictions[p_var.index(p)],label='p=%i' %p)
 
-    plt.title('Parameter p variation for '+ city)
-    plt.xlabel(" hours")
-    plt.ylabel("Number of rentals")
-    plt.legend(loc='best')
-    plt.grid(linestyle = '--', linewidth=0.8)
-    plt.show()
+    # plt.title('Parameter p variation for '+ city + ' (q=3)')
+    # plt.xlabel(" hours")
+    # plt.ylabel("Number of rentals")
+    # plt.legend(loc='best')
+    # plt.grid(linestyle = '--', linewidth=0.8)
+    # plt.show()
 
  # %% Parameter q variation
     # testing
 
     p = 2  # insert the p with lowest error here
-    MA_orders = (1, 2, 3)
+    MA_orders = (1, 2)
     predictions = np.zeros((len(p_var), len_test))
     for q in MA_orders:
         print('Testing ARIMA order (%i, 0, %i)' % (p, q))
@@ -393,7 +393,7 @@ def variation(df,title,q,d):
         history = [w for w in train]
         for t in range(0, len_test):
             model = ARIMA(history, order=(p, d, q))
-            model_fit = model.fit(method='statespace')
+            model_fit = model.fit()
             output = model_fit.forecast()
             yhat = output[0]
             predictions[p_var.index(q)][t] = yhat
@@ -415,7 +415,7 @@ def variation(df,title,q,d):
         results["mape"].append(mape)
         plt.plot(predictions[p_var.index(q)], label='q=%i' % q)
 
-    plt.title('Parameter q variation for '+ city)
+    plt.title('Parameter q variation for '+ city + " (p=1)")
     plt.xlabel(" hours")
     plt.ylabel("Number of rentals")
     plt.legend(loc='best')
@@ -730,7 +730,7 @@ if __name__ == "__main__":
     db = client['carsharing']
     Bookings = db['PermanentBookings']
 
-    cities = ["Amsterdam"]
+    cities = ["Amsterdam", "Milano"]
 
     # ---------------------------------------------------------------------------------------------
 
@@ -738,8 +738,8 @@ if __name__ == "__main__":
     # Setting of the period of time
     date_init = datetime.strptime('2017-10-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
     date_finish = datetime.strptime('2017-10-31T23:59:59', '%Y-%m-%dT%H:%M:%S')
-    # date_init_Denver = datetime.strptime('2017-10-01T06:00:00','%Y-%m-%dT%H:%M:%S')
-    # date_finish_Denver = datetime.strptime('2017-10-30T07:59:59','%Y-%m-%dT%H:%M:%S')
+    #date_init_Denver = datetime.strptime('2017-10-01T06:00:00','%Y-%m-%dT%H:%M:%S')
+    #date_finish_Denver = datetime.strptime('2017-10-30T07:59:59','%Y-%m-%dT%H:%M:%S')
     init_unix = (date_init - datetime(1970, 1, 1)).total_seconds()
     finish_unix = (date_finish - datetime(1970, 1, 1)).total_seconds()
 
@@ -802,9 +802,10 @@ if __name__ == "__main__":
 
         train, test, data = split(df_miss)
 
-        model_training(train, test, data, city)
+        #model_training(train, test, data, city)
 
-        variation(df_miss,"variation over coefficient p",2,0)
+        #variation(df_miss,city,3,0)
+        
         results = variation_p_d(df_miss)
 
         order, p, q = heat_map(results)
