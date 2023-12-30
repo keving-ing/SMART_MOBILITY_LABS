@@ -736,7 +736,7 @@ if __name__ == "__main__":
 
     # STEP_3 - TASK1
     # Setting of the period of time
-    date_init = datetime.strptime('2017-10-01T22:00:00', '%Y-%m-%dT%H:%M:%S')
+    date_init = datetime.strptime('2017-10-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
     date_finish = datetime.strptime('2017-10-31T23:59:59', '%Y-%m-%dT%H:%M:%S')
     # date_init_Denver = datetime.strptime('2017-10-01T06:00:00','%Y-%m-%dT%H:%M:%S')
     # date_finish_Denver = datetime.strptime('2017-10-30T07:59:59','%Y-%m-%dT%H:%M:%S')
