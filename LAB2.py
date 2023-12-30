@@ -730,7 +730,7 @@ if __name__ == "__main__":
     db = client['carsharing']
     Bookings = db['PermanentBookings']
 
-    cities = ["Amsterdam", "Milano"]
+    cities = ["Amsterdam", "Milano", "Denver"]
 
     # ---------------------------------------------------------------------------------------------
 
