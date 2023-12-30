@@ -268,7 +268,7 @@ def model_training(train, test, data, title):
 
     mae = mean_absolute_error(train[0:len(model_fit.fittedvalues)], model_fit.fittedvalues)
     mape = mae / np.mean(train[0:len(model_fit.fittedvalues)]) * 100
-    print("TRAIN DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" % (p, q,
+    print("TRAIN DATASET : (%i,0,%i) model => MAE: %.3f -- MSE: %.3f -- R2: %.3f -- MAPE: %.3f" % (2, 3,
                                                                                                    mean_absolute_error(
                                                                                                        train[0:len(
                                                                                                            model_fit.fittedvalues)],
