@@ -15,6 +15,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator
 import numpy as np
 import geojson
+import seaborn
 
 
 def normalize_matrix(A):
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     zones = array_zones
     len_zones = len(zones)
     all_matrices_mongo = []
-
+    
     # ALL rentals for Car2Go
     # Take the first matrix from MongoDB
     startHour = 0
@@ -162,7 +163,7 @@ if __name__ == "__main__":
             print(c, end="\t")
         print()
     all_matrices_mongo.append(ODMatrix_1)
-    """
+    
 # ALL rentals for Enjoy
     #Take the first matrix from MongoDB
 
@@ -534,12 +535,12 @@ if __name__ == "__main__":
             print(c, end = "\t")
         print()
     all_matrices_mongo.append(ODMatrix_1)
-    """
-    IMQ_matrices_path = ["OD2.csv"]  # "OD2.csv","OD3.csv","OD4.csv","OD5.csv","ODTOT.csv"
+      
+    IMQ_matrices_path = ["OD1.csv","OD2.csv","OD3.csv","OD4.csv","OD5.csv","OD6.csv","ODTOT.csv"]  
     IMQ_matrices = []
 
     for p in IMQ_matrices_path:
-        df = read_csv(p)
+        df = read_csv(p,delimiter=",")
         data = df.fillna(0).values
         print(f"{p} -> Matrix correctly uploaded")
         IMQ_matrices.append(data)
@@ -587,8 +588,48 @@ if __name__ == "__main__":
     print_3d(d_matrix_tmp, label=f"Distance Matrix Carsharing[1]-IMQdataset[10]")
 
     for i, p in enumerate(all_matrices_mongo_normalized):
-        print_3d(p, label=f"Carsharing [{i + 1}]")
+        print_3d(p, label=f"Carsharing ")
     for i, p in enumerate(IMQ_matrices_normalized):
-        print_3d(p, label=f"IMQ dataset [{i + 7}]")
+        print_3d(p, label=f"IMQ dataset ")
+
+    
+
+    #print(len(norm_1_all))
+    results = {"CarSharing":odr, "IMQ dataset":odimq, "dist1": norm_1_all,"dist2": norm_2_all, "dist3": norm_inf_all, "dist4": norm_nuc_all}
+    #dist = [11, 12, 13, 14, 15, 16, 21, 22, 23]
+
+    results = pd.DataFrame(results)
+    fig=plt.figure(figsize = [6,6])
+    heat_df_mpe = results.pivot(index='CarSharing', columns='IMQ dataset',values='dist1')
+    ax=seaborn.heatmap(heat_df_mpe, annot=True, linewidths = .5, fmt='.3f')
+    bottom,top=ax.get_ylim()
+    ax.set_ylim(bottom+0.5,top-0.5)
+    plt.title('1-norm heatmap car2go')
+    plt.show()
+    results = pd.DataFrame(results)
+    fig=plt.figure(figsize = [6,6])
+    heat_df_mpe = results.pivot(index='CarSharing', columns='IMQ dataset',values='dist2')
+    ax=seaborn.heatmap(heat_df_mpe, annot=True, linewidths = .5, fmt='.3f') 
+    bottom,top=ax.get_ylim()
+    ax.set_ylim(bottom+0.5,top-0.5)
+    plt.title('1-norm heatmap car2go')
+    plt.show()
+
+    results = pd.DataFrame(results)
+    fig=plt.figure(figsize = [6,6])
+    heat_df_mpe = results.pivot(index='CarSharing', columns='IMQ dataset',values='dist3')
+    ax=seaborn.heatmap(heat_df_mpe, annot=True, linewidths = .5, fmt='.3f')
+    bottom,top=ax.get_ylim()
+    ax.set_ylim(bottom+0.5,top-0.5)
+    plt.title('1-norm heatmap car2go')
+    plt.show()
+    results = pd.DataFrame(results)
+    fig=plt.figure(figsize = [6,6])
+    heat_df_mpe = results.pivot(index='CarSharing', columns='IMQ dataset',values='dist4')
+    ax=seaborn.heatmap(heat_df_mpe, annot=True, linewidths = .5, fmt='.3f')
+    bottom,top=ax.get_ylim()
+    ax.set_ylim(bottom+0.5,top-0.5)
+    plt.title('1-norm heatmap car2go')
+    plt.show()
 
     print("siamo alla fine")
